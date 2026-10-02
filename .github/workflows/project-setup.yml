@@ -1,0 +1,80 @@
+name: Initialize project milestones
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - docs/project-plan.json
+      - .github/workflows/project-setup.yml
+permissions:
+  contents: read
+  issues: write
+concurrency:
+  group: project-initialization
+  cancel-in-progress: false
+jobs:
+  initialize:
+    if: github.event_name == 'workflow_dispatch' || github.event.head_commit.message != 'docs: publish dual-agent plan, contracts and milestone tasks'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('node:fs');
+            const plan = JSON.parse(fs.readFileSync('docs/project-plan.json', 'utf8'));
+            const {owner, repo} = context.repo;
+            if (owner !== plan.owner || repo !== plan.repository) {
+              throw new Error('Plan owner/repository does not match current repository.');
+            }
+            const args = {owner, repo};
+            const labels = [
+              {name:'owner:attention',color:'8250df',description:'A / local gaze and training'},
+              {name:'owner:scene',color:'0969da',description:'B / scene and game'},
+              {name:'type:implementation',color:'1a7f37',description:'Individual delivery'},
+              {name:'type:acceptance',color:'bf8700',description:'Joint acceptance'},
+              {name:'blocked',color:'cf222e',description:'Waiting for dependency or decision'},
+              ...plan.milestones.map(m=>({name:`stage:${m.id}`,color:'57606a',description:m.title}))
+            ];
+            const existingLabels = await github.paginate(github.rest.issues.listLabelsForRepo, {...args,per_page:100});
+            for (const label of labels) {
+              if (!existingLabels.some(x=>x.name===label.name)) {
+                await github.rest.issues.createLabel({...args,...label});
+              }
+            }
+            const existingMilestones = await github.paginate(github.rest.issues.listMilestones, {...args,state:'all',per_page:100});
+            const milestoneNumbers = new Map();
+            for (const spec of plan.milestones) {
+              let milestone = existingMilestones.find(x=>x.title===spec.title);
+              if (!milestone) {
+                milestone = (await github.rest.issues.createMilestone({...args,title:spec.title,description:spec.description,due_on:spec.due_on})).data;
+              }
+              milestoneNumbers.set(spec.id,milestone.number);
+              core.info(`Milestone ${spec.id}: ${milestone.html_url}`);
+            }
+            const existingIssues = await github.paginate(github.rest.issues.listForRepo, {...args,state:'all',per_page:100});
+            for (const spec of plan.issues) {
+              const marker = `<!-- focus-hiking:${spec.stage}:${spec.role} -->`;
+              let issue = existingIssues.find(x=>!x.pull_request && (x.body||'').includes(marker));
+              const assignees = [];
+              for (const assignee of spec.assignees) {
+                try {
+                  await github.rest.issues.checkUserCanBeAssigned({...args,assignee});
+                  assignees.push(assignee);
+                } catch (error) {
+                  if (error.status !== 404) throw error;
+                  core.warning(`${assignee} is not assignable yet; named owner remains in issue body.`);
+                }
+              }
+              if (!issue) {
+                issue = (await github.rest.issues.create({...args,title:spec.title,body:spec.body,labels:spec.labels,assignees,milestone:milestoneNumbers.get(spec.stage)})).data;
+              } else {
+                const missing = assignees.filter(name=>!issue.assignees.some(x=>x.login===name));
+                if (missing.length) await github.rest.issues.addAssignees({...args,issue_number:issue.number,assignees:missing});
+              }
+              core.info(`${spec.stage}-${spec.role}: ${issue.html_url}`);
+            }
+            core.summary.addHeading('Project initialized')
+              .addRaw('Five milestones and fifteen delivery/acceptance issues. Existing task bodies and completed stages were not overwritten.')
+              .addRaw('\nCollaborator invitation and branch protection require repository administration; this workflow does not claim to configure them.')
+              .write();

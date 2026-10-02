@@ -1,0 +1,246 @@
+{
+  "owner": "llllllir",
+  "repository": "focus-hiking",
+  "collaborator": "RUI-TW",
+  "visibility": "public",
+  "baseline": "2026-10-02",
+  "milestones": [
+    {
+      "id": "M1",
+      "title": "M1 · v0.1 初步登山场景",
+      "due_on": "2026-10-02T15:59:59Z",
+      "description": "今天交付可启动、可游览的初步森林登山场景。 A/B 分别交付 PR，交叉审核，各自合并；共同验收和导师确认后关闭。"
+    },
+    {
+      "id": "M2",
+      "title": "M2 · v0.2 摄像头注视系统",
+      "due_on": "2026-10-04T15:59:59Z",
+      "description": "交付可运行本地摄像头注视系统、个人校准与独立误差报告。 A/B 分别交付 PR，交叉审核，各自合并；共同验收和导师确认后关闭。"
+    },
+    {
+      "id": "M3",
+      "title": "M3 · v0.3 注视驱动登山",
+      "due_on": "2026-10-06T15:59:59Z",
+      "description": "真实注视驱动路标与路径，完成会话模式与联合性能验收。 A/B 分别交付 PR，交叉审核，各自合并；共同验收和导师确认后关闭。"
+    },
+    {
+      "id": "M4",
+      "title": "M4 · v0.4 完整训练闭环",
+      "due_on": "2026-10-09T15:59:59Z",
+      "description": "细化地图、温和事件、规则反馈与本地记录形成完整闭环。 A/B 分别交付 PR，交叉审核，各自合并；共同验收和导师确认后关闭。"
+    },
+    {
+      "id": "M5",
+      "title": "M5 · v0.5 真人试用与改进",
+      "due_on": "2026-10-16T15:59:59Z",
+      "description": "试用、修复、验证可用条件并形成下一版决策。 A/B 分别交付 PR，交叉审核，各自合并；共同验收和导师确认后关闭。"
+    }
+  ],
+  "issues": [
+    {
+      "stage": "M1",
+      "role": "A",
+      "title": "[M1-A] 工程骨架、共享契约、模拟输入与诊断",
+      "assignees": [
+        "llllllir"
+      ],
+      "labels": [
+        "stage:M1",
+        "owner:attention",
+        "type:implementation"
+      ],
+      "body": "<!-- focus-hiking:M1:A -->\n# M1 · v0.1 初步登山场景 / A\n\n负责人：llllllir（注意力）\n分支：codex/m1-attention\n\n## 必须交付\n\n- [ ] 建立 TypeScript/Vite/Three.js 工程，记录实际安装/启动/类型检查/构建命令\n- [ ] 先提交基础 PR，让 B 能立即接入\n- [ ] 定义 docs/interfaces.md 对应类型与适配器，由 B 审核\n- [ ] 实现标记为 simulated 的注视样本与事件、诊断面板\n- [ ] 更新 AGENTS.md 和 CI 的真实应用检查命令\n\n## 阶段门槛\n\n- 新环境按说明能启动，导师可完整游览初步场景\n- A 与 B 各自功能 PR 合入；工程基础先合入\n- 暂停和重启不阻断体验；记录实际 GPU/加载/FPS\n- 视频、截图、运行说明和限制完整；模拟输入明确标识\n\n## 协作标准\n\n阅读 AGENTS.md、docs/development-plan.md、docs/interfaces.md 和个人 agent 任务包。各自分支、独立 PR、对方审查后各自合并。提交运行步骤、实际检查结果、演示、限制及交接；不能把模拟输入当真实摄像头验收。\n"
+    },
+    {
+      "stage": "M1",
+      "role": "B",
+      "title": "[M1-B] 森林场景、路径、自动游览与暂停重启",
+      "assignees": [
+        "RUI-TW"
+      ],
+      "labels": [
+        "stage:M1",
+        "owner:scene",
+        "type:implementation"
+      ],
+      "body": "<!-- focus-hiking:M1:B -->\n# M1 · v0.1 初步登山场景 / B\n\n负责人：RUI-TW（场景）\n分支：codex/m1-scene\n\n## 必须交付\n\n- [ ] 制作营地、森林路径、溪流、山顶远景，先一张地图\n- [ ] 接入 A 工程，提供自动游览、暂停、重启\n- [ ] 控制纹理、植被、阴影与内部渲染分辨率\n- [ ] 记录实际浏览器 GPU、加载和 FPS\n- [ ] 提交截图及 30～60 秒场景演示\n\n## 阶段门槛\n\n- 新环境按说明能启动，导师可完整游览初步场景\n- A 与 B 各自功能 PR 合入；工程基础先合入\n- 暂停和重启不阻断体验；记录实际 GPU/加载/FPS\n- 视频、截图、运行说明和限制完整；模拟输入明确标识\n\n## 协作标准\n\n阅读 AGENTS.md、docs/development-plan.md、docs/interfaces.md 和个人 agent 任务包。各自分支、独立 PR、对方审查后各自合并。提交运行步骤、实际检查结果、演示、限制及交接；不能把模拟输入当真实摄像头验收。\n"
+    },
+    {
+      "stage": "M1",
+      "role": "acceptance",
+      "title": "[M1-验收] M1 · v0.1 初步登山场景 联合验收",
+      "assignees": [
+        "llllllir"
+      ],
+      "labels": [
+        "stage:M1",
+        "type:acceptance"
+      ],
+      "body": "<!-- focus-hiking:M1:acceptance -->\n# M1 · v0.1 初步登山场景 联合验收\n\n今天交付可启动、可游览的初步森林登山场景。\n\n## 通过条件\n\n- [ ] 新环境按说明能启动，导师可完整游览初步场景\n- [ ] A 与 B 各自功能 PR 合入；工程基础先合入\n- [ ] 暂停和重启不阻断体验；记录实际 GPU/加载/FPS\n- [ ] 视频、截图、运行说明和限制完整；模拟输入明确标识\n- [ ] A/B 两项交付 PR 合入并链接\n- [ ] docs/acceptance/ 对应版本材料完整\n- [ ] 已知限制与未解决项明确\n- [ ] 导师确认，A 发布版本并关闭 Milestone\n\n到期或文档 CI 通过不能代替功能验收。\n"
+    },
+    {
+      "stage": "M2",
+      "role": "A",
+      "title": "[M2-A] 本地模型、校准、注视与误差报告",
+      "assignees": [
+        "llllllir"
+      ],
+      "labels": [
+        "stage:M2",
+        "owner:attention",
+        "type:implementation"
+      ],
+      "body": "<!-- focus-hiking:M2:A -->\n# M2 · v0.2 摄像头注视系统 / A\n\n负责人：llllllir（注意力）\n分支：codex/m2-attention\n\n## 必须交付\n\n- [ ] 按 docs/gaze-system.md 实现本地 MediaPipe、Worker 最新帧推理\n- [ ] 实现眼部/虹膜特征、头部姿态、个人岭回归映射\n- [ ] 九点两轮校准、独立五点验证，禁止用拟合误差冒充精度\n- [ ] 实现无效状态、区域匹配与 1.2 秒停留确认\n- [ ] 真人完成至少四人测试，保存匿名 CSV 和失败报告\n\n## 阶段门槛\n\n- 至少四人，至少三人独立中位误差 ≤8% 对角线、P90 ≤15%\n- 正常正面光照有效率 ≥90%，区域选择 ≥80%\n- 20 次停留正确率 ≥85%，5 分钟自由观看误触发 ≤1\n- 覆盖眼镜/头动/光照/拒绝/失效；无效数据单独报告\n- 必须实际 camera 输入、可运行页面与独立误差报告；未达标保持打开\n\n## 协作标准\n\n阅读 AGENTS.md、docs/development-plan.md、docs/interfaces.md 和个人 agent 任务包。各自分支、独立 PR、对方审查后各自合并。提交运行步骤、实际检查结果、演示、限制及交接；不能把模拟输入当真实摄像头验收。\n"
+    },
+    {
+      "stage": "M2",
+      "role": "B",
+      "title": "[M2-B] 独立注视测试界面与路标区域适配",
+      "assignees": [
+        "RUI-TW"
+      ],
+      "labels": [
+        "stage:M2",
+        "owner:scene",
+        "type:implementation"
+      ],
+      "body": "<!-- focus-hiking:M2:B -->\n# M2 · v0.2 摄像头注视系统 / B\n\n负责人：RUI-TW（场景）\n分支：codex/m2-scene\n\n## 必须交付\n\n- [ ] 提供三个不重叠大目标的独立测试页，初始至少 20vw×24vh\n- [ ] 显示注视点、进度、摄像头/校准状态和来源\n- [ ] 实现 CSS 视口坐标路标投影适配，消费 A 信号\n- [ ] 配合真人测量，摄像头拒绝/失效有清晰状态\n- [ ] 不复制模型、不用鼠标演示代替摄像头验收\n\n## 阶段门槛\n\n- 至少四人，至少三人独立中位误差 ≤8% 对角线、P90 ≤15%\n- 正常正面光照有效率 ≥90%，区域选择 ≥80%\n- 20 次停留正确率 ≥85%，5 分钟自由观看误触发 ≤1\n- 覆盖眼镜/头动/光照/拒绝/失效；无效数据单独报告\n- 必须实际 camera 输入、可运行页面与独立误差报告；未达标保持打开\n\n## 协作标准\n\n阅读 AGENTS.md、docs/development-plan.md、docs/interfaces.md 和个人 agent 任务包。各自分支、独立 PR、对方审查后各自合并。提交运行步骤、实际检查结果、演示、限制及交接；不能把模拟输入当真实摄像头验收。\n"
+    },
+    {
+      "stage": "M2",
+      "role": "acceptance",
+      "title": "[M2-验收] M2 · v0.2 摄像头注视系统 联合验收",
+      "assignees": [
+        "llllllir"
+      ],
+      "labels": [
+        "stage:M2",
+        "type:acceptance"
+      ],
+      "body": "<!-- focus-hiking:M2:acceptance -->\n# M2 · v0.2 摄像头注视系统 联合验收\n\n交付可运行本地摄像头注视系统、个人校准与独立误差报告。\n\n## 通过条件\n\n- [ ] 至少四人，至少三人独立中位误差 ≤8% 对角线、P90 ≤15%\n- [ ] 正常正面光照有效率 ≥90%，区域选择 ≥80%\n- [ ] 20 次停留正确率 ≥85%，5 分钟自由观看误触发 ≤1\n- [ ] 覆盖眼镜/头动/光照/拒绝/失效；无效数据单独报告\n- [ ] 必须实际 camera 输入、可运行页面与独立误差报告；未达标保持打开\n- [ ] A/B 两项交付 PR 合入并链接\n- [ ] docs/acceptance/ 对应版本材料完整\n- [ ] 已知限制与未解决项明确\n- [ ] 导师确认，A 发布版本并关闭 Milestone\n\n到期或文档 CI 通过不能代替功能验收。\n"
+    },
+    {
+      "stage": "M3",
+      "role": "A",
+      "title": "[M3-A] 真实注视事件、异常恢复与会话计时",
+      "assignees": [
+        "llllllir"
+      ],
+      "labels": [
+        "stage:M3",
+        "owner:attention",
+        "type:implementation"
+      ],
+      "body": "<!-- focus-hiking:M3:A -->\n# M3 · v0.3 注视驱动登山 / A\n\n负责人：llllllir（注意力）\n分支：codex/m3-attention\n\n## 必须交付\n\n- [ ] 输出真实 GazeEvent 并统一 Worker/页面时间基准\n- [ ] 摄像头信号失效不累计停留，后台暂停、恢复后重新建立停留\n- [ ] 窗口/座位变化触发重验证或重新校准\n- [ ] 管理 5/10/15 分钟会话计时，与 B 协调暂停结束\n- [ ] 记录推理频率、耗时及端到端延迟，参与 15 分钟联合测试\n\n## 阶段门槛\n\n- M2 通过后才算正式联动验收；真实注视可走完旅程\n- 重复确认不重复移动；失效/后台暂停不偷偷累积进度\n- 15 分钟联合运行至少稳定 30FPS、有效推理 ≥10Hz\n- 报告推理处理 P95（目标 ≤120ms）和端到端延迟、异常与限制\n\n## 协作标准\n\n阅读 AGENTS.md、docs/development-plan.md、docs/interfaces.md 和个人 agent 任务包。各自分支、独立 PR、对方审查后各自合并。提交运行步骤、实际检查结果、演示、限制及交接；不能把模拟输入当真实摄像头验收。\n"
+    },
+    {
+      "stage": "M3",
+      "role": "B",
+      "title": "[M3-B] 注视路标路径状态机与会话模式",
+      "assignees": [
+        "RUI-TW"
+      ],
+      "labels": [
+        "stage:M3",
+        "owner:scene",
+        "type:implementation"
+      ],
+      "body": "<!-- focus-hiking:M3:B -->\n# M3 · v0.3 注视驱动登山 / B\n\n负责人：RUI-TW（场景）\n分支：codex/m3-scene\n\n## 必须交付\n\n- [ ] 接入真实目标确认事件，用路径移动状态机驱动角色\n- [ ] 移动期间禁用目标，结束后重投影，防重复推进\n- [ ] 提供 5/10/15 分钟体验、暂停重启和异常状态 UI\n- [ ] 优化场景渲染，必要时降低阴影/植被/分辨率\n- [ ] 与 A 完成一次 15 分钟 camera 旅程并记录性能\n\n## 阶段门槛\n\n- M2 通过后才算正式联动验收；真实注视可走完旅程\n- 重复确认不重复移动；失效/后台暂停不偷偷累积进度\n- 15 分钟联合运行至少稳定 30FPS、有效推理 ≥10Hz\n- 报告推理处理 P95（目标 ≤120ms）和端到端延迟、异常与限制\n\n## 协作标准\n\n阅读 AGENTS.md、docs/development-plan.md、docs/interfaces.md 和个人 agent 任务包。各自分支、独立 PR、对方审查后各自合并。提交运行步骤、实际检查结果、演示、限制及交接；不能把模拟输入当真实摄像头验收。\n"
+    },
+    {
+      "stage": "M3",
+      "role": "acceptance",
+      "title": "[M3-验收] M3 · v0.3 注视驱动登山 联合验收",
+      "assignees": [
+        "llllllir"
+      ],
+      "labels": [
+        "stage:M3",
+        "type:acceptance"
+      ],
+      "body": "<!-- focus-hiking:M3:acceptance -->\n# M3 · v0.3 注视驱动登山 联合验收\n\n真实注视驱动路标与路径，完成会话模式与联合性能验收。\n\n## 通过条件\n\n- [ ] M2 通过后才算正式联动验收；真实注视可走完旅程\n- [ ] 重复确认不重复移动；失效/后台暂停不偷偷累积进度\n- [ ] 15 分钟联合运行至少稳定 30FPS、有效推理 ≥10Hz\n- [ ] 报告推理处理 P95（目标 ≤120ms）和端到端延迟、异常与限制\n- [ ] A/B 两项交付 PR 合入并链接\n- [ ] docs/acceptance/ 对应版本材料完整\n- [ ] 已知限制与未解决项明确\n- [ ] 导师确认，A 发布版本并关闭 Milestone\n\n到期或文档 CI 通过不能代替功能验收。\n"
+    },
+    {
+      "stage": "M4",
+      "role": "A",
+      "title": "[M4-A] 任务规则、自适应事件、本地记录与反馈",
+      "assignees": [
+        "llllllir"
+      ],
+      "labels": [
+        "stage:M4",
+        "owner:attention",
+        "type:implementation"
+      ],
+      "body": "<!-- focus-hiking:M4:A -->\n# M4 · v0.4 完整训练闭环 / A\n\n负责人：llllllir（注意力）\n分支：codex/m4-attention\n\n## 必须交付\n\n- [ ] 先冻结任务/摘要契约，再实现 training 状态机\n- [ ] 实现观察/等待/确认/回忆任务和固定/自适应模式\n- [ ] 仅任务窗口有效信号下离开约 3 秒提示，冷却至少 60 秒，次数 2/4/6 上限\n- [ ] 本地记录可查看和删除，区分 camera/simulated/manual\n- [ ] 摘要可追溯，不生成心理诊断和注意力提升百分比\n\n## 阶段门槛\n\n- 开始、校准、任务、环境事件、结束反馈完整运行\n- 规则冷却/上限有效，自由观景与失效不触发分心惩罚\n- 原始图像不保存/上传，记录可删除，指标可追溯\n- 固定/自适应两种模式可用；联合性能没有退化到门槛以下\n\n## 协作标准\n\n阅读 AGENTS.md、docs/development-plan.md、docs/interfaces.md 和个人 agent 任务包。各自分支、独立 PR、对方审查后各自合并。提交运行步骤、实际检查结果、演示、限制及交接；不能把模拟输入当真实摄像头验收。\n"
+    },
+    {
+      "stage": "M4",
+      "role": "B",
+      "title": "[M4-B] 细化地图、环境事件与任务反馈 UI",
+      "assignees": [
+        "RUI-TW"
+      ],
+      "labels": [
+        "stage:M4",
+        "owner:scene",
+        "type:implementation"
+      ],
+      "body": "<!-- focus-hiking:M4:B -->\n# M4 · v0.4 完整训练闭环 / B\n\n负责人：RUI-TW（场景）\n分支：codex/m4-scene\n\n## 必须交付\n\n- [ ] 细化同一地图的植被、光照、溪流和远景\n- [ ] 实现雾/落叶遮挡/改道等温和环境事件\n- [ ] 消费 TrainingCommand，回传 SceneEvent，不另写注意力规则\n- [ ] 实现任务提示、固定/自适应选择和结束反馈页\n- [ ] 保证自由观景无惩罚，不做强闪烁、惊吓、排名或多地图\n\n## 阶段门槛\n\n- 开始、校准、任务、环境事件、结束反馈完整运行\n- 规则冷却/上限有效，自由观景与失效不触发分心惩罚\n- 原始图像不保存/上传，记录可删除，指标可追溯\n- 固定/自适应两种模式可用；联合性能没有退化到门槛以下\n\n## 协作标准\n\n阅读 AGENTS.md、docs/development-plan.md、docs/interfaces.md 和个人 agent 任务包。各自分支、独立 PR、对方审查后各自合并。提交运行步骤、实际检查结果、演示、限制及交接；不能把模拟输入当真实摄像头验收。\n"
+    },
+    {
+      "stage": "M4",
+      "role": "acceptance",
+      "title": "[M4-验收] M4 · v0.4 完整训练闭环 联合验收",
+      "assignees": [
+        "llllllir"
+      ],
+      "labels": [
+        "stage:M4",
+        "type:acceptance"
+      ],
+      "body": "<!-- focus-hiking:M4:acceptance -->\n# M4 · v0.4 完整训练闭环 联合验收\n\n细化地图、温和事件、规则反馈与本地记录形成完整闭环。\n\n## 通过条件\n\n- [ ] 开始、校准、任务、环境事件、结束反馈完整运行\n- [ ] 规则冷却/上限有效，自由观景与失效不触发分心惩罚\n- [ ] 原始图像不保存/上传，记录可删除，指标可追溯\n- [ ] 固定/自适应两种模式可用；联合性能没有退化到门槛以下\n- [ ] A/B 两项交付 PR 合入并链接\n- [ ] docs/acceptance/ 对应版本材料完整\n- [ ] 已知限制与未解决项明确\n- [ ] 导师确认，A 发布版本并关闭 Milestone\n\n到期或文档 CI 通过不能代替功能验收。\n"
+    },
+    {
+      "stage": "M5",
+      "role": "A",
+      "title": "[M5-A] 注视与规则试用、分析及修复",
+      "assignees": [
+        "llllllir"
+      ],
+      "labels": [
+        "stage:M5",
+        "owner:attention",
+        "type:implementation"
+      ],
+      "body": "<!-- focus-hiking:M5:A -->\n# M5 · v0.5 真人试用与改进 / A\n\n负责人：llllllir（注意力）\n分支：codex/m5-attention\n\n## 必须交付\n\n- [ ] 参与 4～6 人可用性试用并修复阻断问题\n- [ ] 参与约 8～12 人固定/自适应探索对比，平衡顺序\n- [ ] 分析有效率、误触发、校准失败与任务表现\n- [ ] 保存匿名结果和传感器失效报告，修复 A 模块\n- [ ] 与 B 和导师制定下一版建议，不宣称长期注意力提升\n\n## 阶段门槛\n\n- 可用性与探索试用的真实条件、规模、结果和限制完整\n- 阻断问题修复，保留未解决列表，两人各自 PR 合入\n- 匿名试用报告、改进演示、下一版决策及导师确认\n- 不把探索性样本当成长期训练有效性证明\n\n## 协作标准\n\n阅读 AGENTS.md、docs/development-plan.md、docs/interfaces.md 和个人 agent 任务包。各自分支、独立 PR、对方审查后各自合并。提交运行步骤、实际检查结果、演示、限制及交接；不能把模拟输入当真实摄像头验收。\n"
+    },
+    {
+      "stage": "M5",
+      "role": "B",
+      "title": "[M5-B] 场景与交互试用、性能及修复",
+      "assignees": [
+        "RUI-TW"
+      ],
+      "labels": [
+        "stage:M5",
+        "owner:scene",
+        "type:implementation"
+      ],
+      "body": "<!-- focus-hiking:M5:B -->\n# M5 · v0.5 真人试用与改进 / B\n\n负责人：RUI-TW（场景）\n分支：codex/m5-scene\n\n## 必须交付\n\n- [ ] 参与真人试用，记录场景舒适度、挫败感、再用意愿\n- [ ] 固定/自适应保持同地图与难度并平衡体验顺序\n- [ ] 测量场景与联合性能、查交互和视觉问题\n- [ ] 修复 B 模块、提交可复现前后证据\n- [ ] 与 A 汇总限制、改进版演示和下一版建议\n\n## 阶段门槛\n\n- 可用性与探索试用的真实条件、规模、结果和限制完整\n- 阻断问题修复，保留未解决列表，两人各自 PR 合入\n- 匿名试用报告、改进演示、下一版决策及导师确认\n- 不把探索性样本当成长期训练有效性证明\n\n## 协作标准\n\n阅读 AGENTS.md、docs/development-plan.md、docs/interfaces.md 和个人 agent 任务包。各自分支、独立 PR、对方审查后各自合并。提交运行步骤、实际检查结果、演示、限制及交接；不能把模拟输入当真实摄像头验收。\n"
+    },
+    {
+      "stage": "M5",
+      "role": "acceptance",
+      "title": "[M5-验收] M5 · v0.5 真人试用与改进 联合验收",
+      "assignees": [
+        "llllllir"
+      ],
+      "labels": [
+        "stage:M5",
+        "type:acceptance"
+      ],
+      "body": "<!-- focus-hiking:M5:acceptance -->\n# M5 · v0.5 真人试用与改进 联合验收\n\n试用、修复、验证可用条件并形成下一版决策。\n\n## 通过条件\n\n- [ ] 可用性与探索试用的真实条件、规模、结果和限制完整\n- [ ] 阻断问题修复，保留未解决列表，两人各自 PR 合入\n- [ ] 匿名试用报告、改进演示、下一版决策及导师确认\n- [ ] 不把探索性样本当成长期训练有效性证明\n- [ ] A/B 两项交付 PR 合入并链接\n- [ ] docs/acceptance/ 对应版本材料完整\n- [ ] 已知限制与未解决项明确\n- [ ] 导师确认，A 发布版本并关闭 Milestone\n\n到期或文档 CI 通过不能代替功能验收。\n"
+    }
+  ]
+}

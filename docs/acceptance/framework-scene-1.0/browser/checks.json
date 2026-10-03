@@ -1,0 +1,14 @@
+{
+  "resourceFailureRetry": true,
+  "pause10Seconds": true,
+  "resume": true,
+  "restartThreeTimes": true,
+  "screenshots": [
+    "camp",
+    "trail",
+    "creek"
+  ],
+  "pageErrors": [],
+  "visualAcceptance": "not-reviewed",
+  "environment": "headless Edge; not a human desktop performance acceptance"
+}

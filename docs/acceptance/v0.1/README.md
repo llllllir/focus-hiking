@@ -1,4 +1,6 @@
-# M1 初版实现与交接
+# 框架场景1.0：原始自动游览版本记录
+
+2026-10-03 用户正式命名并指出：画质／画风、景物数量、路线丰富度、自由视角、路况起伏与徒步感均不满足要求。本目录保留原始版本运行证据；后续探索迭代见 [修订 spec](../../scene-upgrade.md)。原检查成功不代表本次新标准通过。
 
 状态：初版开发中，未通过联合验收；不关闭 M1。线上基线 main 为 e624c530e2e4e896e8bba7ae09b41ffae10b33e1，任务 [M1-A #1](https://github.com/llllllir/focus-hiking/issues/1)、[M1-B #2](https://github.com/llllllir/focus-hiking/issues/2)。用户要求本次联合初版，单 agent 顺序实现；没有真人交叉审批或伪装对方身份。
 

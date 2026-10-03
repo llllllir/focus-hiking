@@ -4,7 +4,7 @@ const assert = require('node:assert/strict');
 // Uses an installed Playwright package without making it a production dependency.
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 (async () => {
-  const out = path.resolve('docs/acceptance/v0.1/browser');
+  const out = path.resolve(process.env.ACCEPTANCE_OUT || 'docs/acceptance/v0.1/browser');
   fs.mkdirSync(out, { recursive: true });
   const browser = await chromium.launch({ headless: true, channel: 'msedge', args: ['--enable-webgl', '--ignore-gpu-blocklist'] });
   const context = await browser.newContext({ viewport: { width: 1920, height: 1200 }, deviceScaleFactor: 1 });

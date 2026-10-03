@@ -1,0 +1,13 @@
+{
+  "renamed": true,
+  "dragLook": true,
+  "pausedPositionUnchanged": true,
+  "recenter": true,
+  "manualWalking": true,
+  "destinationArrival": true,
+  "pauseTenSeconds": true,
+  "source": "manual",
+  "pageErrors": [],
+  "visualAcceptance": "not-reviewed",
+  "cameraImplemented": false
+}

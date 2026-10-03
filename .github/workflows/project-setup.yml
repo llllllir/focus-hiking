@@ -14,7 +14,8 @@ concurrency:
   cancel-in-progress: false
 jobs:
   initialize:
-    if: github.event_name == 'workflow_dispatch' || github.event.head_commit.message != 'docs: publish dual-agent plan, contracts and milestone tasks'
+    if: >-
+      github.event_name == 'workflow_dispatch' || github.event.head_commit.message != 'docs: publish dual-agent plan, contracts and milestone tasks'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -78,3 +79,4 @@ jobs:
               .addRaw('Five milestones and fifteen delivery/acceptance issues. Existing task bodies and completed stages were not overwritten.')
               .addRaw('\nCollaborator invitation and branch protection require repository administration; this workflow does not claim to configure them.')
               .write();
+

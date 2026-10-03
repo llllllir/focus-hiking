@@ -29,3 +29,7 @@
 
 第一版不做路线导航、社交、排名、多地图或智能手表接入。摄像头图像不保存、不上传。注视行为与游戏表现不等于心理注意力，更不能证明长期训练效果。
 
+
+## M1-A 工程预览
+
+已建立 TS/Vite/Three.js 工程、契约初始类型与明确 simulated 的诊断。npm ci、npm run dev、npm run typecheck、npm test、npm run build 是运行入口。A 单独构建和三项测试已通过；森林场景由 B 集成分支接入。共享契约等待 B 真人审查，摄像头未实现。

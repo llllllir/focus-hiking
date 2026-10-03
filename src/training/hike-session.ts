@@ -62,7 +62,9 @@ export class HikeSession {
   }
   get remainingMs() { return Math.max(0, this.plannedMinutes * 60_000 - this.elapsedMs); }
   isWalking(now: number) { return this.phase === 'running' && this.gazeState(now) === 'on-screen'; }
-  isStorm(now: number) { return this.phase === 'running' && this.away && now < this.stormUntil && this.gazeState(now) === 'off-screen'; }
+  // Once a verified absence starts feedback, a brief camera/renderer gap cannot
+  // restart thunder repeatedly. Only a confirmed return or the deadline ends it.
+  isStorm(now: number) { return this.phase === 'running' && this.away && now < this.stormUntil; }
   direction(now: number) {
     if (!this.isWalking(now)) return null;
     // Screen ray projected onto horizontal camera space. Vertical gaze changes

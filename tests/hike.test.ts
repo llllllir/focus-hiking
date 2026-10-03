@@ -13,6 +13,7 @@ test('on-screen camera moves; stable off-screen stops and feedback lasts at most
  h.accept(sample(31100,'inside'),31100);assert.equal(h.isStorm(31100),false);assert.equal(h.isWalking(31100),true);assert.equal(h.recoveries,1);
 });
 test('returning before 30 seconds immediately restores sunshine and walking',()=>{const h=session();h.accept(sample(0,'outside'),0);h.accept(sample(100,'inside'),100);assert.equal(h.isStorm(100),false);assert.equal(h.isWalking(100),true);});
+test('a camera gap during verified absence cannot flicker or restart its weather deadline',()=>{const h=session();h.accept(sample(0,'outside'),0);h.accept(sample(100,'invalid'),100);assert.equal(h.isStorm(1000),true);assert.equal(h.departures,1);assert.equal(h.isWalking(1000),false);assert.equal(h.isStorm(30000),false);h.accept(sample(30100,'outside'),30100);assert.equal(h.departures,1);assert.equal(h.isStorm(30100),false);});
 test('blink, camera failure, simulated samples and stale coordinates never trigger distraction or motion',()=>{
  const h=session();for(let t=0;t<=1000;t+=100)h.accept(sample(t,'invalid'),t);assert.equal(h.departures,0);assert.equal(h.isStorm(1000),false);
  h.accept(sample(1100,'inside','simulated'),1100);assert.equal(h.isWalking(1100),false);

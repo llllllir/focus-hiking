@@ -18,9 +18,18 @@ import { PerspectiveCamera } from './vendor/v-island/engine/scene/Camera.js';
 import { BufferGeometry } from './vendor/v-island/engine/geometry/BufferGeometry.js';
 import { BufferAttribute, InstancedBufferAttribute } from './vendor/v-island/engine/geometry/BufferAttribute.js';
 
+// The upstream shader/layout caches belong to one device. Keep that idle device
+// across visits while releasing each scene's buffers, textures and view uniforms.
+// Its two small shared frame/shadow buffers stay with their cached bind groups.
+let deviceLost=false;
+
 export async function createIslandRenderer(host, sourceScene, original) {
   const canvas = document.createElement('canvas'); host.append(canvas);
-  try { await GPU.init({canvas}); } catch (e) { canvas.remove(); throw e; }
+  try {
+    if(deviceLost)throw new Error('图形设备已中断，请刷新页面，或使用 WebGL 兼容模式');
+    if(!GPU.device){await GPU.init({canvas});GPU.device.lost.then(()=>{deviceLost=true;});}
+    else {GPU.canvas=canvas;GPU.context=canvas.getContext('webgpu');GPU.context.configure({device:GPU.device,format:GPU.format,alphaMode:'opaque',usage:GPUTextureUsage.RENDER_ATTACHMENT|GPUTextureUsage.COPY_SRC});}
+  } catch (e) { canvas.remove(); throw e; }
   const scene = new Scene(), camera = new PerspectiveCamera(56, 1, .08, 1000);
   const meshes = new MeshRenderer(); meshes.syncPipelines = true;
   const pipeline = new SceneRenderer(meshes, scene, camera);
@@ -114,7 +123,7 @@ export async function createIslandRenderer(host, sourceScene, original) {
     if(m.name==='Forest_Floor')code.push('let mossNoise=mx_fractal_noise_float3(in.P*1.7,3,2.0,.5); let moss=smoothstep(.0,.25,mossNoise)*smoothstep(.65,.9,in.N.y); s.albedo=mix(s.albedo,vec3f(.055,.085,.036),moss*.75); s.roughness=.98;');
     if(/Creek_Submerged/.test(m.name))code.push('let caustic=pow(max(0.0,sin(in.P.x*18.0+frame.time*.3)*sin(in.P.z*15.0-frame.time*.2)),9.0); s.albedo*=1.0+caustic*.25*(1.0-frame.debug.x);');
     if(/Cabin_Weathered|Cabin_Timber/.test(m.name))code.push('let grain=sin(in.P.y*650.0+sin(in.P.x*38.0+in.P.z*38.0)*.35); s.albedo*=.96+.04*grain; s.normal=perturbNormalByHeight(in.P,in.N,dpdx(grain),dpdy(grain),.0001);');
-    if(!/Storm_|Water/.test(m.name))code.push('s.albedo*=mix(1.0,.77,frame.debug.x); s.roughness=mix(s.roughness,max(.12,s.roughness*.35),frame.debug.x);');
+    if(!/Storm_|Water/.test(m.name))code.push('s.albedo*=mix(1.0,.77,frame.debug.y); s.roughness=mix(s.roughness,max(.12,s.roughness*.35),frame.debug.y);');
     if(m.name==='Cabin_Window_Glass')code.push('let drops=sin(in.P.x*150.0+in.P.z*135.0)*sin(in.P.y*85.0+frame.time*3.0); s.normal=perturbNormalByHeight(in.P,in.N,dpdx(drops),dpdy(drops),frame.debug.x*.0005);');
     const lowPlant=/fern|Ecology_Grass|Ecology_Rhododendron|Creek_Weeds/.test(m.name);
     let vertex=leaf?`v.position.x+=sin(frame.time*mix(1.4,2.4,frame.debug.x)+v.position.y*.7+v.position.x+f32(v.instance)*2.399)*smoothstep(${lowPlant?'.02,.6':'2.0,8.0'},v.position.y)*mix(${lowPlant?'.012,.055':'.055,.17'},frame.debug.x);`:'';
@@ -168,12 +177,14 @@ export async function createIslandRenderer(host, sourceScene, original) {
   original.domElement.hidden=true;
   let time=0;
   const adapterInfo=GPU.adapter.info;
+  let retired=false;
   const facade={backend:'v-island-webgpu',gpuDescription:JSON.stringify(adapterInfo?{vendor:adapterInfo.vendor,architecture:adapterInfo.architecture,device:adapterInfo.device,description:adapterInfo.description}:{}),domElement:canvas,
     info:{render:{calls:0,triangles:0}},
     setPixelRatio(r){facade.ratio=r;},ratio:1,
     setSize(w,h){canvas.width=Math.max(1,Math.floor(w*facade.ratio));canvas.height=Math.max(1,Math.floor(h*facade.ratio));canvas.style.width=w+'px';canvas.style.height=h+'px';pipeline.setSize(canvas.width,canvas.height);reflectionTarget.setSize(Math.max(1,canvas.width>>1),Math.max(1,canvas.height>>1));},
-    setQuality(size){if(shadows.size===size)return;shadows.texture.destroy();shadows.texture=new Texture({label:'sunShadowMap',width:size,height:size,depth:3,dimension:'2d-array',format:'depth32float',usage:['sample','render']});shadows.size=size;setShadowMap(shadows.texture);ShadowUniforms.fields.mapSize.value=size;shadows.cascades.forEach(c=>c.dirty=true);},
+    setQuality(size){if(shadows.size===size)return;shadows.texture.destroy();shadows.texture=new Texture({label:'sunShadowMap',width:size,height:size,depth:3,dimension:'2d-array',format:'depth32float',usage:['sample','render']});shadows.size=size;shadows.lightMargin=size<=512?40:90;setShadowMap(shadows.texture);ShadowUniforms.fields.mapSize.value=size;shadows.cascades.forEach(c=>c.dirty=true);},
     render(s,c){
+      if(retired)return;
       s.updateMatrixWorld(true);camera.position.copy(c.position);camera.quaternion.copy(c.quaternion);
       for(const skin of skins){
         const {source:o,joints,data}=skin;data.copyWithin(joints*16,0,joints*16);skin.inverse.copy(o.matrixWorld).invert();
@@ -182,6 +193,7 @@ export async function createIslandRenderer(host, sourceScene, original) {
       }
       camera.aspect=c.aspect;camera.fov=c.fov;camera.updateProjectionMatrix();
       F.debug.value.x=Number(s.userData.weatherIntensity)||0;
+      F.debug.value.y=Number(s.userData.rainIntensity)||0;
       F.sunColor.value.setRGB(...(F.debug.value.x?[.12,.15,.18]:[3.1,2.45,1.7]));
       F.skyIrradiance.value.setRGB(...(F.debug.value.x?[.18,.22,.26]:[.22,.29,.36]));
       F.horizonColor.value.setRGB(...(F.debug.value.x?[.25,.3,.35]:[.58,.64,.68]));
@@ -189,7 +201,8 @@ export async function createIslandRenderer(host, sourceScene, original) {
         if(o.isInstancedMesh&&n.userData.sourceInstanceVersion!==o.instanceMatrix.version){n.instanceMatrix.array.set(o.instanceMatrix.array);n.instanceMatrix.needsUpdate=true;n.userData.sourceInstanceVersion=o.instanceMatrix.version;}}
       time=performance.now()/1000;F.time.value=time;
       GPU.beginFrame();setFrameCamera(camera,canvas.width,canvas.height);
-      if(time-lastShadowTime>.12||camera.position.distanceTo(shadowCameraPosition)>.7){
+      const economical=shadows.size<=512;
+      if(time-lastShadowTime>(economical?.9:.12)||camera.position.distanceTo(shadowCameraPosition)>(economical?1.2:.7)){
         shadows.render(scene,meshes,shadows.update(camera,F.sunDir.value));shadowCameraPosition.copy(camera.position);lastShadowTime=time;
       }
       if((frameNumber++%2===0||frameNumber===1)&&Math.abs(camera.position.z+108)<85){
@@ -202,9 +215,9 @@ export async function createIslandRenderer(host, sourceScene, original) {
       pipeline.render();output.render({colorViews:[GPU.context.getCurrentTexture().createView()],clear:[0,0,0,1]});GPU.submit();
       facade.info.render.calls=meshes.stats.draws;facade.info.render.triangles=meshes.stats.triangles;
     },
-    dispose(){skins.forEach(s=>s.buffer.destroy());geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());textures.forEach(t=>t.destroy());
+    dispose(){if(retired)return;retired=true;skins.forEach(s=>s.buffer.destroy());geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());textures.forEach(t=>t.destroy());
       shadows.texture.destroy();for(const rt of [reflectionTarget,pipeline.sceneRT,pipeline.opaqueCopy,pipeline.opaqueDepthHalf,pipeline.hullMaskRT]){rt.textures.forEach(t=>t.destroy());rt.depthTexture?.destroy();}
-      meshes.drawBuffer?.destroy();canvas.remove();GPU.context.unconfigure();GPU.device.destroy();}
+      meshes.drawBuffer?.destroy();pipeline.hullMaskMaterial.dispose();reflectedFrame.destroy();shadows.cascades.forEach(c=>c.block.destroy());canvas.remove();GPU.context.unconfigure();}
   };
   return facade;
 }

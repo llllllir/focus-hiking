@@ -6,7 +6,13 @@ import type { Point } from './navigation';
 import type { AttentionPort, SceneEvent, ScenePort, GazeEvent, TargetRegion, InputSource } from '../contracts';
 
 // Optional existing A port. The current entry deliberately does not pass simulated input.
-export function mountGame(app: HTMLElement, attention?: AttentionPort) {
+export interface GameOptions {
+  hike?: boolean;
+  onReady?: (forest: ForestView) => void;
+  onFrame?: (forest: ForestView, now: number, dtMs: number) => boolean;
+  onError?: (message: string) => void;
+}
+export function mountGame(app: HTMLElement, attention?: AttentionPort, options: GameOptions = {}) {
   app.innerHTML = `
     <div class="scene-host" aria-label="森林登山三维场景"></div>
     <header class="topbar"><a class="brand" href="/">FOCUS <span>HIKING</span></a><span class="version">场景2.0 · 山林探索 / 画质未验收</span></header>
@@ -17,9 +23,12 @@ export function mountGame(app: HTMLElement, attention?: AttentionPort) {
     <footer class="footer"><span>混合林 · 溪谷 · 山坡 <label style="margin-left:12px">画质 <select id="quality" aria-label="场景画质"><option value="original">原画</option><option value="high">高清</option><option value="smooth">流畅</option></select></label> <label>天气 <select id="weather" aria-label="天气模式"><option value="clear">晴天</option><option value="rain">阴雨雷暴</option></select></label> <button id="storm-sound" aria-pressed="false">开启环境声音</button></span><span id="metrics">加载中</span><a href="/audio/forest/CREDITS.md" target="_blank" rel="noopener" style="color:inherit">声音来源</a></footer>
     <div class="end" hidden><p class="eyebrow">END OF THE TRAIL</p><h2>这一段，走完了。</h2><p>你可以再走一遍，也可以停留片刻。</p><button class="primary" id="again">再走一遍</button><button id="end-report">下载运行记录</button></div>`;
   const get = <T extends HTMLElement>(selector: string) => app.querySelector<T>(selector)!;
-  const qualitySelect=get<HTMLSelectElement>('#quality');qualitySelect.value=new URLSearchParams(location.search).get('quality')||'original';
+  const qualitySelect=get<HTMLSelectElement>('#quality');
+  if(options.hike) qualitySelect.insertAdjacentHTML('afterbegin','<option value="auto">自动</option>');
+  qualitySelect.value=new URLSearchParams(location.search).get('quality')||(options.hike?'auto':'original');
   qualitySelect.addEventListener('change',()=>{forest?.setQuality(qualitySelect.value);const url=new URL(location.href);url.searchParams.set('quality',qualitySelect.value);history.replaceState(null,'',url);});
   const weatherSelect=get<HTMLSelectElement>('#weather');weatherSelect.value=new URLSearchParams(location.search).get('weather')==='rain'?'rain':'clear';
+  if(options.hike)weatherSelect.insertAdjacentHTML('beforeend','<option value="cloudy">阴天 · 雷声</option>');
   const soundButton=get<HTMLButtonElement>('#storm-sound');let soundsOn=false;
   const enableSound=async()=>{if(!forest)return;try{await forest.armAudio();forest.mute(false);soundsOn=true;soundButton.textContent='静音';soundButton.setAttribute('aria-pressed','true');}catch{soundsOn=false;soundButton.textContent='重试环境声音';}};
   weatherSelect.addEventListener('change',()=>{forest?.setWeather(weatherSelect.value==='rain'?'rain':'clear');const url=new URL(location.href);url.searchParams.set('weather',weatherSelect.value);history.replaceState(null,'',url);if(weatherSelect.value==='rain')void enableSound();});
@@ -32,7 +41,7 @@ export function mountGame(app: HTMLElement, attention?: AttentionPort) {
   const intro = get<HTMLElement>('.intro');
   const end = get<HTMLElement>('.end');
   const tour = new Tour();
-  let exploring = false, walker: TrailWalker | null = null, explorationPaused = false;
+  let exploring = !!options.hike, walker: TrailWalker | null = null, explorationPaused = false;
   let planning = false, plannedGoal: Point | null = null;
   const map = get<SVGSVGElement & HTMLElement>('#explorer-map');
   const depart = get<HTMLButtonElement>('#depart');
@@ -114,6 +123,7 @@ export function mountGame(app: HTMLElement, attention?: AttentionPort) {
     if (disposed || !forest) return;
     const dt = last ? now - last : 0; last = now;
     if (!document.hidden) {
+      const hikeWalking = options.onFrame?.(forest, now, dt) ?? false;
       if (!exploring) tour.advance(Math.min(dt, 100));
       if (!exploring && (tour.state === 'running' || tour.state === 'completed')) {
         for (const [id, progress] of [['camp', 0], ['trail', .2], ['creek', .6], ['ridge', .85]] as const) {
@@ -131,7 +141,8 @@ export function mountGame(app: HTMLElement, attention?: AttentionPort) {
           if (dx || dz) { walker.stop(); plannedGoal = null; depart.disabled = true; navigationSource = 'manual'; const speed = Math.min(dt, 100) * .00145 / Math.hypot(dx, dz); forest.move(dx * speed, dz * speed); walker.position = forest.position(); }
         }
       }
-      if (!fixedView) forest.update(exploring ? (explorationPaused ? 0 : dt/1000) : (tour.state === 'running' ? dt/1000 : 0), exploring ? !!walker?.moving || keys.size > 0 : tour.state === 'running');
+      if (options.hike) forest.update(Math.min(dt,100)/1000,hikeWalking);
+      else if (!fixedView) forest.update(exploring ? (explorationPaused ? 0 : dt/1000) : (tour.state === 'running' ? dt/1000 : 0), exploring ? !!walker?.moving || keys.size > 0 : tour.state === 'running');
       else forest.update(Math.min(dt,100)/1000,false);
       const marker = map.querySelector('#map-position');
       if (marker) {
@@ -158,7 +169,7 @@ export function mountGame(app: HTMLElement, attention?: AttentionPort) {
     }
     if (now > nextMetric) {
       const recent = frameTimes.slice(-120); const fps = recent.length ? 1000 * recent.length / recent.reduce((a, b) => a + b, 0) : 0;
-      get<HTMLElement>('#metrics').textContent = `${Math.round(fps)} FPS · ${forest.renderer.info.render.calls} draws · ${navigationSource}`;
+      get<HTMLElement>('#metrics').textContent = options.hike?`${Math.round(fps)} FPS`:`${Math.round(fps)} FPS · ${forest.renderer.info.render.calls} draws · ${navigationSource}`;
       nextMetric = now + 1000;
     }
     frame = requestAnimationFrame(render);
@@ -178,12 +189,22 @@ export function mountGame(app: HTMLElement, attention?: AttentionPort) {
         if (debug) gpu = String(gl.getParameter(debug.UNMASKED_RENDERER_WEBGL));
       }
       if (fixedView) { view.viewpoint(fixedView); intro.hidden = true; }
+      if(options.hike) {
+        intro.hidden=true; exploration.hidden=false;
+        get<HTMLElement>('.version').textContent='眼动徒步 · 秋季森林';
+        exploration.querySelector('h2')!.textContent='当前位置';
+        exploration.querySelector('p')!.textContent='地图跟随位置；路线旁显示偏离距离。';
+        for(const selector of ['#mode','#center','.destinations','#depart','#navigation-status','.explore small'])get<HTMLElement>(selector).hidden=true;
+        weatherSelect.disabled=true; forest.setQuality(qualitySelect.value);
+      }
       drawMap(); start.disabled = false; start.textContent = '开始探索'; last = 0;
+      options.onReady?.(forest);
       frame = requestAnimationFrame(render);
     } catch (cause) {
       if (disposed || id !== attempt) return;
       error.hidden = false; start.textContent = '加载未完成';
       error.querySelector('p')!.textContent = `${cause instanceof Error ? cause.message : '加载失败'}。请使用支持 WebGPU 的 Edge / Chrome；兼容模式可在地址后添加 ?engine=webgl。`;
+      options.onError?.(error.querySelector('p')!.textContent!);
     }
   };
   const begin = () => { intro.hidden = true; setExploring(); void enableSound(); };
@@ -195,10 +216,10 @@ export function mountGame(app: HTMLElement, attention?: AttentionPort) {
   map.onclick = event => { if (!planning) return; const point = map.createSVGPoint(); point.x = event.clientX; point.y = event.clientY; const matrix = map.getScreenCTM(); if (matrix) { const p = point.matrixTransform(matrix.inverse()); plan([p.x,0,p.y]); } };
   get<HTMLButtonElement>('#center').onclick = () => forest?.resetLook();
   app.querySelectorAll<HTMLButtonElement>('[data-destination]').forEach(button => { button.onclick = () => { const view = forest?.manifest.viewpoints.find(v => v.id === button.dataset.destination); if (view) plan(view.position); }; });
-  const pointerDown = (event: PointerEvent) => { if (!intro.hidden || fixedView) return; drag = { x: event.clientX, y: event.clientY, moved: false }; host.setPointerCapture(event.pointerId); };
+  const pointerDown = (event: PointerEvent) => { if (options.hike || !intro.hidden || fixedView) return; drag = { x: event.clientX, y: event.clientY, moved: false }; host.setPointerCapture(event.pointerId); };
   const pointerMove = (event: PointerEvent) => { if (!drag) return; const dx = event.clientX - drag.x, dy = event.clientY - drag.y; if (Math.abs(dx) + Math.abs(dy) > 2) drag.moved = true; forest?.look(dx, dy); drag.x = event.clientX; drag.y = event.clientY; };
   const pointerUp = (event: PointerEvent) => { if (drag && !drag.moved && exploring && planning && forest) { const rect = host.getBoundingClientRect(); const goal = forest.pick((event.clientX - rect.left) / rect.width, (event.clientY - rect.top) / rect.height); if (goal) plan(goal); } drag = null; };
-  const keyDown = (event: KeyboardEvent) => { if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement || !intro.hidden || fixedView) return; const key = event.key.toLowerCase(); if ('wasd'.includes(key) && key.length === 1) { event.preventDefault(); if (!exploring) setExploring(); keys.add(key); } };
+  const keyDown = (event: KeyboardEvent) => { if (options.hike || event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement || !intro.hidden || fixedView) return; const key = event.key.toLowerCase(); if ('wasd'.includes(key) && key.length === 1) { event.preventDefault(); if (!exploring) setExploring(); keys.add(key); } };
   const keyUp = (event: KeyboardEvent) => keys.delete(event.key.toLowerCase());
   const blur = () => { keys.clear(); drag = null; };
   host.addEventListener('pointerdown', pointerDown); host.addEventListener('pointermove', pointerMove); host.addEventListener('pointerup', pointerUp); host.addEventListener('pointercancel', blur);
@@ -208,8 +229,8 @@ export function mountGame(app: HTMLElement, attention?: AttentionPort) {
   get<HTMLButtonElement>('#retry').onclick = () => { restart(); void load(); };
   get<HTMLButtonElement>('#report').onclick = () => {
     const record = {
-      version: '场景2.0', source: exploring ? navigationSource : 'simulated', visualAcceptance: 'not-reviewed', cameraImplemented: false,
-      cameraInputConnected: !!attention,
+        version: '场景2.0', source: options.hike ? forest?.scene.userData.hikeSource : exploring ? navigationSource : 'simulated', visualAcceptance: 'not-reviewed', cameraImplemented: options.hike && forest?.scene.userData.hikeSource === 'camera',
+        cameraInputConnected: !!attention || (options.hike && forest?.scene.userData.hikeSource === 'camera'),
       weather: weatherSelect.value, audioEnabled: soundsOn, audioSource: 'original Web Audio synthesis / HRTF',
       scenery: forest?.scenery(), bodyPosition: forest?.position(), mode: planning ? 'route' : 'free',
       sceneRevision:'forest-weather-ecology-rig-1',ecology:forest?.scene.userData.ecology,wildlife:forest?.scene.userData.wildlife,

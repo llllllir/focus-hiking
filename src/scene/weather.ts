@@ -1,16 +1,17 @@
 import * as THREE from 'three';
 
-export type WeatherMode = 'clear' | 'rain';
+export type WeatherMode = 'clear' | 'rain' | 'cloudy';
 
 // Original synthesis: no recordings, remote audio or camera input. Panners are
 // positioned in the same metre/y-up coordinate frame as the forest camera.
 class StormAudio {
   private context: AudioContext | null = null;
   private master: GainNode | null = null;
-  private loops: {source: AudioBufferSourceNode; gain: GainNode; pan?:PannerNode; offset?:THREE.Vector3}[] = [];
+  private loops: {source: AudioBufferSourceNode; gain: GainNode; volume:number; pan?:PannerNode; offset?:THREE.Vector3}[] = [];
   private transient = new Set<AudioBufferSourceNode>();
   private muted = false;
   private rain = false;
+  private cloudy = false;
   private noise(seconds:number) {
     const ctx=this.context!;const buffer=ctx.createBuffer(1,Math.ceil(ctx.sampleRate*seconds),ctx.sampleRate);
     const samples=buffer.getChannelData(0);let state=0x217865;
@@ -26,19 +27,22 @@ class StormAudio {
         const filter=this.context.createBiquadFilter();filter.type='bandpass';filter.frequency.value=frequency;filter.Q.value=.65;
         const envelope=this.context.createGain();envelope.gain.value=gain;
         const pan=this.context.createPanner();pan.panningModel='HRTF';pan.distanceModel='inverse';pan.refDistance=8;pan.positionX.value=x;pan.positionZ.value=z;
-        source.connect(filter).connect(envelope).connect(pan).connect(this.master);source.start(0,Math.random()*8);this.loops.push({source,gain:envelope,pan,offset:new THREE.Vector3(x,0,z)});
+        source.connect(filter).connect(envelope).connect(pan).connect(this.master);source.start(0,Math.random()*8);this.loops.push({source,gain:envelope,volume:gain,pan,offset:new THREE.Vector3(x,0,z)});
       }
       // Roof/window taps: irregular impulses filtered into a soft woody tick.
       const tapping=this.context.createBuffer(1,this.context.sampleRate*7,this.context.sampleRate),data=tapping.getChannelData(0);
       for(let t=0;t<7;t+=.028+Math.random()*.12){const begin=Math.floor(t*this.context.sampleRate);for(let k=0;k<600&&begin+k<data.length;k++)data[begin+k]+=(Math.random()*2-1)*Math.exp(-k/95)*.22;}
       const taps=this.context.createBufferSource();taps.buffer=tapping;taps.loop=true;
       const gain=this.context.createGain();gain.gain.value=.16;const pan=this.context.createStereoPanner();pan.pan.value=.6;
-      taps.connect(gain).connect(pan).connect(this.master);taps.start();this.loops.push({source:taps,gain});
+      taps.connect(gain).connect(pan).connect(this.master);taps.start();this.loops.push({source:taps,gain,volume:.16});
     }
     await this.context.resume();this.apply();
   }
-  private apply(){if(this.context&&this.master)this.master.gain.setTargetAtTime(this.rain&&!this.muted ? .7 : 0,this.context.currentTime,.35);}
-  setRain(rain:boolean){this.rain=rain;this.apply();if(!rain){for(const source of this.transient){try{source.stop();}catch{/* already ended */}}this.transient.clear();}}
+  private apply(){if(this.context&&this.master){
+    this.master.gain.setTargetAtTime(this.rain&&!this.muted ? .7 : 0,this.context.currentTime,.35);
+    this.loops.forEach((loop,i)=>loop.gain.gain.setTargetAtTime(this.cloudy?(i===2?.06:0):loop.volume,this.context!.currentTime,.2));
+  }}
+  setRain(rain:boolean,cloudy=false){this.rain=rain||cloudy;this.cloudy=cloudy;this.apply();if(!this.rain){for(const source of this.transient){try{source.stop();}catch{/* already ended */}}this.transient.clear();}}
   setMuted(muted:boolean){this.muted=muted;this.apply();}
   thunder(position:THREE.Vector3) {
     const ctx=this.context;if(!ctx||ctx.state!=='running'||!this.rain)return;
@@ -61,7 +65,7 @@ class StormAudio {
   dispose(){this.loops.forEach(l=>l.source.stop());this.transient.forEach(s=>{try{s.stop();}catch{/* ended */}});void this.context?.close();}
 }
 
-export function createWeather(scene:THREE.Scene,camera:THREE.PerspectiveCamera,ground:THREE.Object3D[]) {
+export function createWeather(scene:THREE.Scene,camera:THREE.PerspectiveCamera,ground:THREE.Object3D[],sample?: (x:number,z:number)=>{point:THREE.Vector3}|null) {
   let mode:WeatherMode='clear',time=0,stormAt=8,flashRemaining=0,surfaceAt=-1;
   const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
   const audio=new StormAudio();
@@ -85,14 +89,15 @@ export function createWeather(scene:THREE.Scene,camera:THREE.PerspectiveCamera,g
   const ray=new THREE.Raycaster();const surfaces:THREE.Vector3[]=[];
   // Local surface samples include roofs and windows; rays produce horizontal rings
   // on land/roof/water, plus vertical splashes on nearby window panes.
-  const weatherSurfaces=[...ground];scene.traverse(o=>{if(!(o instanceof THREE.Mesh))return;let cabin=false;for(let p=o.parent;p;p=p.parent)if(p.name==='Autumn_Cabin')cabin=true;if(cabin||o.name.startsWith('Water'))weatherSurfaces.push(o);});
+  const weatherSurfaces=sample?[]:[...ground];scene.traverse(o=>{if(!(o instanceof THREE.Mesh))return;let cabin=false;for(let p=o.parent;p;p=p.parent)if(p.name==='Autumn_Cabin')cabin=true;if(cabin||o.name.startsWith('Water'))weatherSurfaces.push(o);});
   const original=new Map<THREE.MeshStandardMaterial,{color:THREE.Color;roughness:number;metalness:number}>();
   scene.traverse(o=>{if(o instanceof THREE.Mesh)for(const m of Array.isArray(o.material)?o.material:[o.material])if(m instanceof THREE.MeshStandardMaterial)original.set(m,{color:m.color.clone(),roughness:m.roughness,metalness:m.metalness});});
   function setMode(next:WeatherMode) {
-    mode=next;rainRoot.visible=next==='rain';scene.userData.weatherIntensity=next==='rain'?1:0;audio.setRain(next==='rain');bolt.visible=false;
+    if(mode===next&&scene.userData.weatherIntensity!==undefined)return;
+    mode=next;rainRoot.visible=next==='rain';scene.userData.weatherIntensity=next==='rain'?1:next==='cloudy'?.6:0;scene.userData.rainIntensity=next==='rain'?1:0;audio.setRain(next==='rain',next==='cloudy');bolt.visible=false;
     for(const [m,saved] of original){m.color.copy(saved.color);m.roughness=saved.roughness;m.metalness=saved.metalness;
       if(next==='rain'&&!/Fur|Feather|Foliage|fern/.test(m.name)){m.color.multiplyScalar(.8);m.roughness=Math.min(m.roughness,.29);}}
-    time=0;stormAt=8;surfaceAt=-1;
+    time=0;stormAt=next==='cloudy'?.1:8;surfaceAt=-1;
   }
   function lightning(){
     const direction=new THREE.Vector3(.35,.1,-1).applyQuaternion(camera.quaternion);direction.y=0;direction.normalize();
@@ -110,7 +115,11 @@ export function createWeather(scene:THREE.Scene,camera:THREE.PerspectiveCamera,g
   return {
     setMode,mode:()=>mode,armAudio:()=>audio.arm(),mute:(muted:boolean)=>audio.setMuted(muted),
     update(dt:number){
-      audio.listener(camera);if(mode!=='rain')return;time+=dt;rainRoot.position.copy(camera.position);rainRoot.position.y=camera.position.y-8;
+      audio.listener(camera);if(mode==='clear')return;time+=dt;
+      flashRemaining-=dt;if(flashRemaining<=0)bolt.visible=false;
+      if(time>=stormAt){lightning();stormAt=time+30+random()*20;}
+      if(mode==='cloudy')return;
+      rainRoot.position.copy(camera.position);rainRoot.position.y=camera.position.y-8;
       // Update source matrices too: the explicit WebGL compatibility mode shares
       // the same precipitation, while the WebGPU adapter uploads the instance data.
       for(let i=0;i<rain.count;i++){
@@ -119,7 +128,8 @@ export function createWeather(scene:THREE.Scene,camera:THREE.PerspectiveCamera,g
       rain.instanceMatrix.needsUpdate=true;
       if(time-surfaceAt>1){surfaceAt=time;surfaces.length=0;scene.updateMatrixWorld(true);
         for(let i=0;i<ripples.count;i++){const x=camera.position.x+(random()-.5)*20,z=camera.position.z+(random()-.5)*20;
-          ray.set(new THREE.Vector3(x,camera.position.y+15,z),new THREE.Vector3(0,-1,0));const hit=ray.intersectObjects(weatherSurfaces,true)[0];surfaces.push(hit?hit.point.clone():new THREE.Vector3(x,-100,z));}}
+          ray.set(new THREE.Vector3(x,camera.position.y+15,z),new THREE.Vector3(0,-1,0));const hit=ray.intersectObjects(weatherSurfaces,true)[0],soil=sample?.(x,z);
+          const contact=hit&&(!soil||hit.point.y>soil.point.y)?hit.point:soil?.point;surfaces.push(contact?contact.clone():new THREE.Vector3(x,-100,z));}}
       for(let i=0;i<ripples.count;i++){
         const phase=(time*1.8+i*.618)%1;transform.position.copy(surfaces[i]??new THREE.Vector3(0,-100,0)).sub(rainRoot.position);transform.position.y+=.012;
         transform.rotation.set(-Math.PI/2,0,0);transform.scale.setScalar(.3+phase*3.4);transform.updateMatrix();ripples.setMatrixAt(i,transform.matrix);
@@ -132,8 +142,6 @@ export function createWeather(scene:THREE.Scene,camera:THREE.PerspectiveCamera,g
         transform.rotation.set(0,angle,Math.sin(angle)*.6);transform.scale.setScalar(1-phase);transform.updateMatrix();splashes.setMatrixAt(i,transform.matrix);
       }
       splashes.instanceMatrix.needsUpdate=true;
-      flashRemaining-=dt;if(flashRemaining<=0)bolt.visible=false;
-      if(time>=stormAt){lightning();stormAt=time+30+random()*20;}
     },
     dispose(){audio.dispose();rain.geometry.dispose();dropMaterial.dispose();ripples.geometry.dispose();splashes.geometry.dispose();rippleMaterial.dispose();boltGeometry.dispose();(bolt.material as THREE.Material).dispose();rainRoot.removeFromParent();bolt.removeFromParent();},
   };

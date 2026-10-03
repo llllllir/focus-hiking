@@ -1,0 +1,20 @@
+{
+  "input": "synthetic Canvas + Worker fixtures, NOT human camera accuracy",
+  "humanAcceptance": "pending",
+  "checks": {
+    "realLocalModelNoFaceAndNoExternalRequests": true,
+    "permissionDenial": true,
+    "missingModelAllowsRetry": true,
+    "positionCalibration26EpisodesAndIndependent5PointValidation": true,
+    "screenCalibration20EpisodesIndependent10EpisodeValidation": true,
+    "anonymousNumericCsvExports": true,
+    "offScreenBlinkStalePoseAndRecovery": true,
+    "existingAttentionPortStartsActualSceneRoute": true,
+    "sceneReportsConnectedCameraSource": true,
+    "fullscreenExitInvalidatesCalibration": true,
+    "cancellationAndBackgroundCancelSampling": true,
+    "stopAndReturnToCalibration": true,
+    "cancelStartupAndWorkerFailure": true
+  },
+  "errors": []
+}

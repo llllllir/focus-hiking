@@ -1,0 +1,19 @@
+{
+  "input": "synthetic Canvas video streams and Worker fixtures; NOT human camera acceptance",
+  "humanAcceptance": "pending",
+  "pageErrors": [],
+  "realWorkerLocalModelSyntheticNoFace": true,
+  "noRuntimeExternalRequests": true,
+  "permissionDenialRetry": true,
+  "modelFailureRetry": true,
+  "syntheticDirectionAndEyeWidget": true,
+  "syntheticCalibration18PointsAndIndependentValidation5Points": true,
+  "syntheticCsvStructure": true,
+  "syntheticLossPoseRangeStaleAndRecovery": true,
+  "resizeInvalidatesCalibration": true,
+  "calibrationCancellation": true,
+  "backgroundCancelsSampling": true,
+  "stopReleasesTracksAndCancelsStartup": true,
+  "runtimeWorkerFailureAllowsRestart": true,
+  "narrowViewportControlsVisible": true
+}

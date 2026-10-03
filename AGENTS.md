@@ -18,6 +18,10 @@ TypeScript + Vite + Three.js；浏览器 getUserMedia；本地 MediaPipe Face La
 
 ## 修改边界
 
+2026-10-03 眼动升级：A 的 `codex/m2-attention` 已加入稳健采样、按眼宽归一化、有限二次岭回归选择、屏幕内外校准/独立验证及三态门控。`?mode=gaze-scene` 通过现有 AttentionPort 组合森林入口，不修改共享契约或 B 源文件。实际通过类型检查、30项逻辑测试、生产构建及13组生产浏览器检查；浏览器为明确标记的合成输入，真人精度和联合性能待测。详情见 `docs/eye-gaze-integration.md` 与 `docs/acceptance/gaze-upgrade/`。标准命令仍为 `npm ci`、`npm run dev`、`npm run typecheck`、`npm test`、`npm run build`；本机实际使用忽略目录内npm CLI，新增浏览器检查命令为 `node scripts/gaze-upgrade-browser-check.cjs`（先配置本机PLAYWRIGHT_MODULE）。
+
+2026-10-03 眼动原型：A 分支 `codex/m2-attention`，MediaPipe tasks-vision 固定1.0.1、本地版本1模型与WASM、Worker、九点两轮岭回归、五点独立验证、小球/眼球诊断。Vite因实际审计问题更新至7.3.6。新增 `npm run assets:gaze` 用于资源重建。实际通过类型检查、20项逻辑测试、生产构建、文档检查和审计（0漏洞）；Edge自动化使用合成输入，仅验证模型加载与流程，不能用于真人M2验收。记录见 `docs/acceptance/gaze-prototype/`。共享契约、场景和游戏模块未改写，未推送/合并，M2保持待真人验收。
+
 - A：`src/attention/`、`src/training/`、对应测试和技术文档；工程配置和锁文件默认由 A 维护。
 - B：`src/scene/`、`src/game/`、对应测试和素材记录。
 - 共享：`src/contracts/`。M1-A 定义并交由 B 审查；后续变更先建立双方认可的契约 PR，再修改消费端。

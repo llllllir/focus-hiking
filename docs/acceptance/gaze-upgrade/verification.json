@@ -1,0 +1,35 @@
+{
+  "date": "2026-10-03",
+  "branch": "codex/m2-attention",
+  "base": "e624c530e2e4e896e8bba7ae09b41ffae10b33e1",
+  "checks": {
+    "typecheck": "passed",
+    "logicTests": 30,
+    "build": "passed",
+    "browserGroups": 13,
+    "pageErrors": 0
+  },
+  "input": "synthetic fixtures and local real model processing synthetic no-face frames",
+  "humanAccuracy": "not measured",
+  "files": {
+    "src/main.ts": "214dd3fcbe0a0e2bfdbd42f3b7912e37c567495e6a3c5b0772977979f783dd36",
+    "src/attention/calibration.ts": "62a732f956a63bcab222c68c4acfdd1e67ded87c9a8356b4ddbd4e642164c0ce",
+    "src/attention/camera.ts": "6b0dac2be74f59bfc279f26f60e0014430422490a6aefd940b888c2fcec33ad1",
+    "src/attention/diagnostics.ts": "91ebc534153db9ee0abb79759f5255c0c3e61f5af71cbd3ce0152e6eab36934f",
+    "src/attention/dwell.ts": "f65f1477d94c7cd17d74f47d44c4cb6e0b679ae3d027d6dda4f0f624a8811838",
+    "src/attention/features.ts": "464ce68a4cc8150285ce2e3322e3982974008cb2ab675fbc23cd5ea91cb12544",
+    "src/attention/filter.ts": "9bb04d4e2a1f80020d7a26685492ac1fca1c1305d9920fd2a9d10773c1ea5f1c",
+    "src/attention/gaze.worker.ts": "71fe8fbcaf17aeeea0e22e07bc2b39cf8f4dfd8cdee5c59a6ebef6f03c90180e",
+    "src/attention/measurement.ts": "71ab23ab55be26cc5fb26745a6b5aa0074b8f6c7d2debd209025f43bd686080b",
+    "src/attention/pipeline.ts": "cae88db7fa796bff1a98bc899fe466216b793eff48bcd9d0a2a8898860ad0b03",
+    "src/attention/protocol.ts": "5ba1232c4935c659ef221b98dccf65681df9becb0dca07bdce4c988fb539e8a6",
+    "src/attention/regression.ts": "7b95634ed21cb808a88352841e3c4c3ead520c22c25b80a569b6ef7848a7f584",
+    "src/attention/scene-session.ts": "6ecf96bb3bc9e6a888a4c6e262a560f8ecd96024795302d27a8754bdbd443a2f",
+    "src/attention/screen.ts": "699c5df6df9b32085852686151cc29dc1d55d9dabd54a25b53ac80e4e6f63d42",
+    "src/attention/simulated.ts": "dd3c1ad097dcfb07b7cb9020d0547d02e8668d9f4ca243c828d71ec433a07b2a",
+    "src/attention/test-page.css": "9df85c4eae0f4fdfc73c0a65fb834a0bd36cbeadfa5bbd530f86c795c679a3f9",
+    "src/attention/test-page.ts": "37cbe1c6d0905cc51d4ece4162073978a0556829d1a804b48f60c45d1c2dd349",
+    "tests/gaze-upgrade.test.ts": "461bd9f3f96e5e3e4ef939cf3a61da33ebc019aebb242de1e69c94fa233804eb",
+    "scripts/gaze-upgrade-browser-check.cjs": "2b30dfe9268ebcac4c95b7c0576275fcea9f06593693ba72aef1b60803a1b2a2"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "input": "synthetic camera fixture; no human accuracy test",
+  "developmentFirstCameraLoadNoReload": true,
+  "existingSceneEntryLoads": true,
+  "sceneDiagnosticRemainsSimulated": true,
+  "pageErrors": []
+}

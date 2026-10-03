@@ -52,7 +52,7 @@ export interface ForestView {
 export async function createForest(host: HTMLElement): Promise<ForestView> {
   const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
   const requestedQuality=new URLSearchParams(location.search).get('quality');
-  const profile=(level:string|null)=>level==='smooth'?naturalConfig.quality.smooth:level==='high'?naturalConfig.quality.high:{maxWidth:sceneConfig.maxWidth,maxHeight:sceneConfig.maxHeight,shadowSize:2048,nearDistance:naturalConfig.vegetation.nearDistance,farDistance:naturalConfig.vegetation.farDistance};
+  const profile=(level:string|null)=>level==='adaptive-min'?{maxWidth:800,maxHeight:500,shadowSize:512,nearDistance:12,farDistance:65}:level==='adaptive-low'||level==='auto'?{maxWidth:960,maxHeight:600,shadowSize:512,nearDistance:18,farDistance:90}:level==='smooth'?naturalConfig.quality.smooth:level==='high'?naturalConfig.quality.high:{maxWidth:sceneConfig.maxWidth,maxHeight:sceneConfig.maxHeight,shadowSize:2048,nearDistance:naturalConfig.vegetation.nearDistance,farDistance:naturalConfig.vegetation.farDistance};
   let quality=profile(requestedQuality);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -239,14 +239,14 @@ export async function createForest(host: HTMLElement): Promise<ForestView> {
     animals.forEach(a=>a.mesh.removeFromParent());
     manifest.solids = [...(manifest.solids ?? []), ...autumn.solids];
     for (const [id, view] of Object.entries(autumn.views)) manifest.viewpoints.push({id,label:({moose:'驼鹿林地',wetland:'秋季湿地',cabin:'红木屋',canopy:'秋色树冠'} as Record<string,string>)[id],position:view.position as Point,lookAt:view.lookAt as Point});
-    const weather = createWeather(scene,camera,ground);
+    const weather = createWeather(scene,camera,ground,ecology.sample);
     const setWeather=(mode:WeatherMode)=>{
       weather.setMode(mode);
-      soundscape.setRain(mode==='rain');
-      skyUniforms.turbidity.value=mode==='rain'?14:3;
-      skyUniforms.rayleigh.value=mode==='rain'?.3:1.4;
-      sun.intensity=mode==='rain'?.15:2.5;
-      scene.fog=mode==='rain'?new THREE.Fog('#66737e',30,210):new THREE.Fog('#adbdc0',sceneConfig.fogNear,sceneConfig.fogFar);
+      const storm=mode!=='clear';soundscape.setRain(storm);
+      skyUniforms.turbidity.value=storm?14:3;
+      skyUniforms.rayleigh.value=storm?.3:1.4;
+      sun.intensity=storm?.15:2.5;
+      scene.fog=storm?new THREE.Fog('#66737e',30,210):new THREE.Fog('#adbdc0',sceneConfig.fogNear,sceneConfig.fogFar);
     };
     const ray = new THREE.Raycaster();
     const body = new THREE.Vector3();
@@ -273,8 +273,7 @@ export async function createForest(host: HTMLElement): Promise<ForestView> {
       const bounds = manifest.bounds ?? { minX: -65, maxX: 65, minZ: -85, maxZ: 42 };
       if (x < bounds.minX || x > bounds.maxX || z < bounds.minZ || z > bounds.maxZ || (manifest.obstacles ?? []).some(o => Math.hypot(x - o.x, z - o.z) < o.radius + .3)) return;
       if ((manifest.solids ?? []).some(b=>x>b.minX-.25 && x<b.maxX+.25 && z>b.minZ-.25 && z<b.maxZ+.25)) return;
-      ray.set(new THREE.Vector3(x, 100, z), new THREE.Vector3(0, -1, 0));
-      const hit = ray.intersectObjects(ground, false)[0];
+      const hit = ecology.sample(x,z);
       if (hit && Math.abs(hit.point.y + 1.7 - body.y) < .5) { walked += Math.hypot(x-body.x,z-body.z); body.set(x, hit.point.y + 1.7, z); }
     };
     const pick = (x: number, y: number): Point | null => {
@@ -299,8 +298,7 @@ export async function createForest(host: HTMLElement): Promise<ForestView> {
       const p = Math.min(1, Math.max(0, progress));
       const previous = body.clone(); body.copy(path.getPointAt(p));
       if (p > 0) walked += Math.hypot(body.x-previous.x,body.z-previous.z);
-      ray.set(new THREE.Vector3(body.x, 100, body.z), new THREE.Vector3(0, -1, 0));
-      const surface = ray.intersectObjects(ground, false)[0];
+      const surface = ecology.sample(body.x,body.z);
       if (surface) body.y = surface.point.y + 1.7;
       const ahead = path.getPointAt(Math.min(1, p + .025));
       if (p > .975) ahead.add(path.getTangentAt(p).multiplyScalar(4));
@@ -319,10 +317,10 @@ export async function createForest(host: HTMLElement): Promise<ForestView> {
     };
     const update = (seconds: number, moving: boolean) => {
       const dt = Math.min(Math.max(seconds, 0), .1); motionTime += dt;
-      autumn.update(motionTime,weather.mode()==='rain');
+      autumn.update(motionTime,weather.mode()!=='clear');
       weather.update(dt);
       soundscape.update(camera,dt);
-      wildlife.update(dt,camera,weather.mode()==='rain');
+      wildlife.update(dt,camera,weather.mode()!=='clear');
       creek.update(dt,weather.mode()==='rain');
       animalMotion.value = motionTime;
       for(const lod of treeLods) {

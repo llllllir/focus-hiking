@@ -1,0 +1,18 @@
+{
+  "source": "simulated; no real camera or model inference",
+  "warmupSeconds": 20,
+  "measurementSeconds": 60,
+  "phase": "running",
+  "elapsedMs": 80148.70000000298,
+  "samples": 3090,
+  "averageFps": 51.49064586600101,
+  "frameP95Ms": 36.30000000000291,
+  "framesOver50Ms": 6,
+  "drawingBuffer": [
+    800,
+    500
+  ],
+  "autoLevel": 2,
+  "gpu": "{\"vendor\":\"intel\",\"architecture\":\"gen-12lp\",\"device\":\"\",\"description\":\"\"}",
+  "errors": []
+}

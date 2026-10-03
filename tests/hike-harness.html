@@ -1,0 +1,13 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><title>simulated · 徒步规则浏览器检查</title></head><body><div id="app"></div><script type="module">
+import '/src/style.css';
+import {mountHikeGame} from '/src/game/hike-game.ts';
+const listeners=new Set();
+const port={subscribeSamples(fn){listeners.add(fn);return()=>listeners.delete(fn)},subscribeEvents(){return()=>{}},setTargets(){}};
+const fixture={state:'inside',x:.5,y:.5,enabled:true,game:null};
+fixture.port=port;
+fixture.game=mountHikeGame(document.querySelector('#app'),port,{minutes:5,source:'simulated',onExit(){fixture.game.dispose()},onRecalibrate(){fixture.game.dispose()}});
+window.__hikeFixture=fixture;
+setInterval(()=>{if(!fixture.enabled)return;const inside=fixture.state==='inside';const sample={timestampMs:performance.now(),source:'camera',valid:inside,x:inside?fixture.x:null,y:inside?fixture.y:null,invalidReason:inside?null:fixture.state==='outside'?'off-screen':'eyes-unavailable'};listeners.forEach(fn=>fn(sample));},1000/15);
+// This fixture directly emits labelled synthetic camera-shaped samples. It does
+// not load a camera or establish actual calibration/recognition accuracy.
+</script></body></html>

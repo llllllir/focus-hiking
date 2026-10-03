@@ -1,7 +1,12 @@
 import './style.css';
 
 const app = document.querySelector<HTMLElement>('#app')!;
-if (new URLSearchParams(location.search).get('mode') === 'gaze-scene') {
+const search=new URLSearchParams(location.search),mode=search.get('mode');
+if (mode==='hike'||(!mode&&!search.has('view'))) {
+  const {mountHikeExperience}=await import('./hike-experience');
+  const dispose=mountHikeExperience(app);
+  if(import.meta.hot)import.meta.hot.dispose(dispose);
+} else if (mode === 'gaze-scene') {
   const { mountGazeScene } = await import('./attention/scene-session');
   const dispose = mountGazeScene(app);
   if (import.meta.hot) import.meta.hot.dispose(dispose);

@@ -10,6 +10,12 @@ TypeScript + Vite + Three.js；浏览器 getUserMedia；本地 MediaPipe Face La
 
 初始化仓库目前只有文档。M1-A 建立工程后必须在这里更新实际安装、启动、类型检查、构建与测试命令，不能凭空声称命令已成功。
 
+## M1 初版实际命令（2026-10-03）
+
+已建立应用工程。标准环境使用 `npm ci`、`npm run dev`、`npm run typecheck`、`npm test`、`npm run build`。本机没有 PATH 上的 npm，因此本次用工作区忽略目录内的 npm CLI 执行同一脚本；安装使用 install，6 项逻辑测试、类型检查与生产构建已执行通过。浏览器与 Blender 验证以 `docs/acceptance/v0.1/` 的实际记录为准；未记录的项目不得宣称通过。
+
+场景或界面修改前先读 `DESIGN.md`、`refs/README.md`、`refs/DO-NOT.md`。用户本次要求 A/B 联合初版，单 agent 顺序实现，未同时运行双方 agent；仍保留 A/B 代码归属、独立 PR 和真人审查要求，不伪装以对方身份提交或审查。
+
 ## 修改边界
 
 - A：`src/attention/`、`src/training/`、对应测试和技术文档；工程配置和锁文件默认由 A 维护。

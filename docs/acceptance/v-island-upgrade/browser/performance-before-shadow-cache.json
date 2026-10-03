@@ -1,0 +1,34 @@
+{
+  "durationMs": 60270,
+  "input": "manual (scripted mouse destination)",
+  "cameraInputConnected": false,
+  "viewport": [
+    1920,
+    1200
+  ],
+  "drawingBuffer": [
+    1920,
+    1200
+  ],
+  "gpu": "v-island-webgpu {\"vendor\":\"intel\",\"architecture\":\"gen-12lp\",\"device\":\"\",\"description\":\"\"}",
+  "loadedMs": 6086,
+  "samples": 850,
+  "averageFps": 14.00322568422232,
+  "frameP95Ms": 97,
+  "renderInfo": {
+    "calls": 313,
+    "triangles": 6601973
+  },
+  "bodyStart": [
+    7.035063294538718,
+    1.6270903837660853,
+    93
+  ],
+  "bodyEnd": [
+    -27.590462466148555,
+    5.510070924819027,
+    35.475144474534616
+  ],
+  "errors": [],
+  "visualAcceptance": "not-reviewed"
+}

@@ -1,0 +1,15 @@
+{
+  "duration": "60-second destination walk",
+  "source": "manual",
+  "gpu": "ANGLE (Intel, Intel(R) UHD Graphics (0x0000A788) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+  "drawingBuffer": [
+    1920,
+    1200
+  ],
+  "loadedMs": 284,
+  "frames": 2262,
+  "meanFps": 37.032125614541734,
+  "frameP95Ms": 30.599999999998545,
+  "visualAcceptance": "not-reviewed",
+  "jointGazeTest": false
+}

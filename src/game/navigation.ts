@@ -1,6 +1,20 @@
 export type Point = [number, number, number];
 export interface Trail { id: string; label: string; points: Point[] }
 
+/** Horizontal distance to the route corridor, independently of slope elevation. */
+export function nearestTrack(points:Point[],position:Point):{point:Point;distance:number;segment:number}|null {
+  if(points.length<2||!position.every(Number.isFinite))return null;
+  let best:{point:Point;distance:number;segment:number}|null=null;
+  for(let i=1;i<points.length;i++){
+    const a=points[i-1],b=points[i];if(![...a,...b].every(Number.isFinite))continue;
+    const dx=b[0]-a[0],dz=b[2]-a[2];
+    const t=Math.max(0,Math.min(1,((position[0]-a[0])*dx+(position[2]-a[2])*dz)/(dx*dx+dz*dz||1)));
+    const point=a.map((v,k)=>v+(b[k]-v)*t) as Point,distance=Math.hypot(position[0]-point[0],position[2]-point[2]);
+    if(!best||distance<best.distance)best={point,distance,segment:i-1};
+  }
+  return best;
+}
+
 /** Scene-owned trail graph. A supplies confirmations, never camera or mesh objects. */
 export function findTrailPath(trails: Trail[], from: Point, to: Point): Point[] {
   const nodes: Point[] = [], edges: Map<number, number>[] = [];

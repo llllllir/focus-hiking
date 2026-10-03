@@ -1,5 +1,7 @@
 # 视觉参考来源
 
+2026-10-03 新用户方向为 [秋季森林、动物、湿地、木屋与雷雨](autumn-direction.md)。目前依据文字参考；最后四张原图未从其他聊天提取。以下初夏与已有样片说明保留作历史记录。
+
 ## 当前方向：山地森林探索
 
 《猎人：荒野的召唤》[官方探索开发日志](https://callofthewild.thehunter.com/developer-diary-exploring-emerald-coast/)：借鉴环境层次、探索和疏密变化。[Revontuli Coast](https://callofthewild.thehunter.com/home/dlc/reserves/thehunter-call-of-the-wild-revontuli-coast/)：借鉴林地、岩石与高地之间的路段差异。仅保存链接和分析，不收录受版权保护的游戏资源。

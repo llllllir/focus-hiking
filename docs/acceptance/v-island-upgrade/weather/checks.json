@@ -1,0 +1,22 @@
+{
+  "checks": [
+    "weather retains body position and WebGPU backend",
+    "native audio context started from user gesture; listening still required",
+    "mute toggle",
+    "clear restores mode and keeps position"
+  ],
+  "audio": [
+    {
+      "state": "running",
+      "sampleRate": 48000
+    },
+    {
+      "state": "running",
+      "sampleRate": 48000
+    }
+  ],
+  "errors": [],
+  "source": "scripted UI, no camera",
+  "visualAcceptance": "not-reviewed",
+  "audioAcceptance": "not-listened"
+}

@@ -1,0 +1,146 @@
+{
+  "version": "场景2.0自然升级",
+  "date": "2026-10-03",
+  "model": {
+    "bytes": 30919304,
+    "sha256": "9bad6b1c97ec78010f0bdbf42eb02e36d9ca2c4e52a1ab6ed261e43bc0996e88"
+  },
+  "assetsVerified": 9,
+  "build": {
+    "config": {
+      "terrain": {
+        "basis": "design",
+        "why": "保持同图边界和三条路线；细分到约1.5m并缓和溪岸陡壁，坡面叠加多尺度起伏。",
+        "grid": 320,
+        "horizontalScale": 3,
+        "creekHalfWidth": 1.35,
+        "bankWidth": 5.5,
+        "detailAmplitude": 0.32
+      },
+      "vegetation": {
+        "basis": "design",
+        "why": "以分枝树冠、交叉枝叶和林冠内部衬片替代规则枝条；按距离分级，减少集显填充。",
+        "seed": 4419,
+        "treeCandidates": 1100,
+        "leafAlphaTest": 0.45,
+        "nearDistance": 45,
+        "farDistance": 150,
+        "tileSize": 72,
+        "windAmplitude": 0.055
+      },
+      "lighting": {
+        "basis": "design",
+        "why": "晴朗初夏侧光，天空环境反射补充林下漫反射，薄雾只表达远景空气。",
+        "sunIntensity": 2.5,
+        "hemisphereIntensity": 1.55,
+        "exposure": 0.94,
+        "fogNear": 170,
+        "fogFar": 760,
+        "shadowSize": 2048
+      },
+      "animals": {
+        "basis": "design",
+        "why": "四足步态与路程绑定；活动包含停留、低头和缓慢巡游，限定在干地且避开行走障碍。",
+        "count": 6,
+        "speed": 0.35,
+        "stride": 0.8,
+        "surfaceHz": 8
+      },
+      "quality": {
+        "basis": "design",
+        "why": "原画与现有渲染上限一致；高清／流畅仅减少昂贵的渲染细节，保持同一地图。",
+        "original": {},
+        "high": {
+          "maxWidth": 1600,
+          "maxHeight": 1000,
+          "shadowSize": 1536,
+          "nearDistance": 35,
+          "farDistance": 130
+        },
+        "smooth": {
+          "maxWidth": 1280,
+          "maxHeight": 800,
+          "shadowSize": 1024,
+          "nearDistance": 24,
+          "farDistance": 110
+        }
+      },
+      "budgets": {
+        "basis": "design",
+        "why": "保持项目60FPS目标，不以简化档替代原画验收；新增文件和绘制次数由检查脚本测量。",
+        "frameP95Ms": 16.7,
+        "maxSceneBytes": 30000000,
+        "maxMainDraws": 220,
+        "maxMainTriangles": 1500000
+      }
+    },
+    "finiteVertices": true,
+    "meshes": 4155,
+    "triangles": 7853425,
+    "sourceSha256": "b2166eb385d4e856fdd127db28674bf3ee22aa4e1d103226998116f00ebf49b5",
+    "inputSha256": {
+      "src/scene/natural_trees.py": "903d208d912ac5caa363e58f20d4e894b650d12030d3209145b6ca5ecabacd27",
+      "src/scene/config/natural-upgrade.json": "85e3acaf583e6ff092fc4ceecd3001618f39f0f81336a611c1fe892946117b94",
+      "src/scene/natural-assets.json": "defacbe02a4db692669638c434bb121268e615259b56ee524cc2497300e4a9e1",
+      "src/scene/config/build-tools.json": "59f2ced01d76e3b8c2586c3a30e1a39b9aa4cc589b7dc8fe0f7bcfa3d92008b7"
+    }
+  },
+  "performance": {
+    "duration": "60-second destination walk",
+    "source": "manual",
+    "gpu": "ANGLE (Intel, Intel(R) UHD Graphics (0x0000A788) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "drawingBuffer": [
+      1920,
+      1200
+    ],
+    "loadedMs": 418.2000000011176,
+    "frames": 1700,
+    "meanFps": 27.661211984138735,
+    "frameP95Ms": 42.69999999999709,
+    "visualAcceptance": "not-reviewed",
+    "jointGazeTest": false
+  },
+  "budgets": {
+    "sceneBytes": {
+      "target": 30000000,
+      "actual": 30919304,
+      "passed": false
+    },
+    "frameP95": {
+      "target": 16.7,
+      "actual": 42.69999999999709,
+      "passed": false
+    },
+    "drawSnapshot": {
+      "target": 220,
+      "actual": 229,
+      "passed": false,
+      "note": "Three.js info includes shadow rendering; not an isolated main-pass measurement."
+    },
+    "trianglesSnapshot": {
+      "target": 1500000,
+      "actual": 1606686,
+      "passed": false,
+      "note": "Includes shadow rendering; snapshot, not a route maximum."
+    }
+  },
+  "verified": {
+    "version": "场景2.0",
+    "rename": true,
+    "manualWalking": true,
+    "planWaitsForConfirmation": true,
+    "pause": true,
+    "arrival": true,
+    "animalMovement": true,
+    "sessionSeeds": true,
+    "tentEntry": true,
+    "tentWallCollision": true,
+    "pageErrors": [],
+    "visualAcceptance": "not-reviewed",
+    "source": "manual"
+  },
+  "humanVisualAcceptance": "not-reviewed",
+  "comfortAcceptance": "not-reviewed",
+  "cameraJointAcceptance": "not-tested",
+  "remotePR": "not-created"
+}

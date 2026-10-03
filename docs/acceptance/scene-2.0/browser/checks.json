@@ -1,0 +1,15 @@
+{
+  "version": "场景2.0",
+  "rename": true,
+  "manualWalking": true,
+  "planWaitsForConfirmation": true,
+  "pause": true,
+  "arrival": true,
+  "animalMovement": true,
+  "sessionSeeds": true,
+  "tentEntry": true,
+  "tentWallCollision": true,
+  "pageErrors": [],
+  "visualAcceptance": "not-reviewed",
+  "source": "manual"
+}

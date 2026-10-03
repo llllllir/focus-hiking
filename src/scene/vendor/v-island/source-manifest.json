@@ -1,0 +1,307 @@
+{
+  "repository": "https://github.com/BAP-CAMP/v-island",
+  "commit": "ba73c70c3b591b2aca874da40a68cfdd0dfc7ab4",
+  "source": "src/engine/",
+  "files": [
+    {
+      "path": "engine/Engine.js",
+      "bytes": 2411,
+      "sha256": "1f3da648c591554a0c88281f00dd400cff2846ce0ebf54f28cd084048db5aa47"
+    },
+    {
+      "path": "engine/constants.js",
+      "bytes": 529,
+      "sha256": "ac2c24210365781e672f808a3872f05305c65b29d24dee6125dc6a37ebf636cc"
+    },
+    {
+      "path": "engine/core/EventDispatcher.js",
+      "bytes": 1006,
+      "sha256": "445ba9daeb1a86651bc8b1fe97ffa385db6461121899edfa626074dceb683517"
+    },
+    {
+      "path": "engine/geometry/BufferAttribute.js",
+      "bytes": 9113,
+      "sha256": "1627eaf856bd89940679427a725d7c295ee781be0c40973296f67a8989928483"
+    },
+    {
+      "path": "engine/geometry/BufferGeometry.js",
+      "bytes": 12113,
+      "sha256": "ca70896ececa7627adc0636dff14542459397eb77a48367326560c88fffecec7"
+    },
+    {
+      "path": "engine/geometry/BufferGeometryUtils.js",
+      "bytes": 4984,
+      "sha256": "80f94c1ffa046710e6e1ba74fc573474d5eaed65374c03ce739107fb33ac66ab"
+    },
+    {
+      "path": "engine/geometry/PolyhedronGeometry.js",
+      "bytes": 4403,
+      "sha256": "028b38294cf843172485131362d324e0e3278a8e76b7df4a8b1142350a9aaa63"
+    },
+    {
+      "path": "engine/geometry/PrimitiveGeometries.js",
+      "bytes": 14494,
+      "sha256": "d9ea566242f4d312ce2630229e52dec5ecb0e828d81ae4a88864aab9c45f9ad2"
+    },
+    {
+      "path": "engine/geometry/RoundedBoxGeometry.js",
+      "bytes": 4025,
+      "sha256": "e3a3c93e3b54986f205623fe6ef1bd07eb51e64ea5eef84acef6ef85fae4bedf"
+    },
+    {
+      "path": "engine/geometry/TubeGeometry.js",
+      "bytes": 2202,
+      "sha256": "b944f4d3053fc543b43f9694cc14012b8ec5535f52b86ac2738936c58b4c3e17"
+    },
+    {
+      "path": "engine/geometry/index.js",
+      "bytes": 978,
+      "sha256": "17fb2fe64d48517c2921728e924f191c17b47ae7ee0d735c3cbe862999a8c2ec"
+    },
+    {
+      "path": "engine/gpu/Compute.js",
+      "bytes": 2897,
+      "sha256": "d5b8361a589c8ba5736d5c0244054ed72a369b2b2b5cca5b7c450f1c1d6b305f"
+    },
+    {
+      "path": "engine/gpu/GPU.js",
+      "bytes": 10061,
+      "sha256": "bbfed68c5df4ffcf4218ae68d9fa9690ee758e70e958c9a5b6d09ff6812eda7f"
+    },
+    {
+      "path": "engine/gpu/Memory.js",
+      "bytes": 3458,
+      "sha256": "9dd3471e926268f4be86e2886403ea71625d18713a9908ec75ebc4b32fb9c4ed"
+    },
+    {
+      "path": "engine/gpu/Mipmaps.js",
+      "bytes": 3189,
+      "sha256": "bee2181fe2ceaa7cb5215e62e7e1bb6cde09cfc3c1ab63b1ac4f0d48b5d8e0e5"
+    },
+    {
+      "path": "engine/gpu/Readback.js",
+      "bytes": 4357,
+      "sha256": "0d22ce1d4ad81c5ca487fbde4d234c92a14034b15f35c779764d74000c43620d"
+    },
+    {
+      "path": "engine/gpu/Shader.js",
+      "bytes": 22664,
+      "sha256": "2d42858f8bdf916d4a137ceffff81010be4db993c3746e16546b68793dd97f13"
+    },
+    {
+      "path": "engine/gpu/Texture.js",
+      "bytes": 9437,
+      "sha256": "c2aff3e1e73781f70162272f4829bbf27afc749d1d5d6d9753b61c9b91f6c819"
+    },
+    {
+      "path": "engine/gpu/Uniforms.js",
+      "bytes": 8999,
+      "sha256": "5f22596b682ad5dcbdba5aed169b8dd59f779aada9bdd47ba89bfda1007e4dd9"
+    },
+    {
+      "path": "engine/index.js",
+      "bytes": 465,
+      "sha256": "ed3b6c3aa7ef879135e2c31664620eff216e014066c15b2d4f2e0fb5fbf0b72c"
+    },
+    {
+      "path": "engine/loaders/GLTF.js",
+      "bytes": 8959,
+      "sha256": "be807e1a6b05002f67e5cfec1f19222a98e1fd323855cc1df5a771b5a046d350"
+    },
+    {
+      "path": "engine/math/Box3.js",
+      "bytes": 5566,
+      "sha256": "7476d8d4c4d7cbec8a93474189f0e26ad9a0b21955529d740a2c09e9577c155f"
+    },
+    {
+      "path": "engine/math/CatmullRomCurve3.js",
+      "bytes": 7788,
+      "sha256": "5e5179186da069c2dd41cb97255969c224770cdb4d7129235afe0f0784b2fdf8"
+    },
+    {
+      "path": "engine/math/Color.js",
+      "bytes": 7322,
+      "sha256": "f397f0573f11e8c846203745585e3f581ccf0e1012943b05073951bd3a2a0121"
+    },
+    {
+      "path": "engine/math/DataUtils.js",
+      "bytes": 1277,
+      "sha256": "a80b7402823e029b6ded871f4481caa40bec1bef720732f219f797bbf4fbcaf2"
+    },
+    {
+      "path": "engine/math/Euler.js",
+      "bytes": 4152,
+      "sha256": "1909234e60a39e861cfeef78e3cf7f2b55e9a81ca7ac6cbc12891da567c1f397"
+    },
+    {
+      "path": "engine/math/Frustum.js",
+      "bytes": 3491,
+      "sha256": "c60e30168e4e8076745c8c1e2f302d974f9e69ecae19070055d8481b6998b1e9"
+    },
+    {
+      "path": "engine/math/MathUtils.js",
+      "bytes": 4541,
+      "sha256": "cda3c6881cea8a48b3abe7a4bf1bdfbc1080de58dba4899b80f4cb7ab4dfbed7"
+    },
+    {
+      "path": "engine/math/Matrix3.js",
+      "bytes": 4580,
+      "sha256": "901aa818ba7b5371d08893b06b085317ca3a8df04675fb5c6da467053e974930"
+    },
+    {
+      "path": "engine/math/Matrix4.js",
+      "bytes": 14558,
+      "sha256": "386986ed0c14ca1bc9fe813af61b25c330f2da071ae0c8760777af19242d9ea8"
+    },
+    {
+      "path": "engine/math/Plane.js",
+      "bytes": 2297,
+      "sha256": "90dc9b76671860598288bdbbd248319e07680779583ff1573585987e341eac79"
+    },
+    {
+      "path": "engine/math/Quaternion.js",
+      "bytes": 8398,
+      "sha256": "2efa7bf5a202b01b82ff50fdf96d0d6add6211ac6ef851bda3a9eaa1d162ba85"
+    },
+    {
+      "path": "engine/math/Ray.js",
+      "bytes": 4195,
+      "sha256": "4ebb193580feaa5a2ccbaaaff3530ebf6071465e5878c215dd743deaf023cb0c"
+    },
+    {
+      "path": "engine/math/ShapeUtils.js",
+      "bytes": 6154,
+      "sha256": "338492381d3f2d3f338731bd9c84c044258469d2e11be8ce1b6451c31a1f022a"
+    },
+    {
+      "path": "engine/math/Sphere.js",
+      "bytes": 3012,
+      "sha256": "b606dd8ea556d1f9a597cb84372ac7ed4fd2404b1844d32a1e55d0d32b2f88da"
+    },
+    {
+      "path": "engine/math/Spherical.js",
+      "bytes": 979,
+      "sha256": "d8085dd578924862e9ba870a6fb2eb6cd39a33547993046bb3d40567f7fb7611"
+    },
+    {
+      "path": "engine/math/Timer.js",
+      "bytes": 1876,
+      "sha256": "5e5a82a35cd53db7a8400f1d2ec6adc80ffaf8426d9b7878148c430b42b316d7"
+    },
+    {
+      "path": "engine/math/Vector2.js",
+      "bytes": 4588,
+      "sha256": "d39a0c7cda56324cb59fb2ed86176b58852900b07b7bd19093f0e000df5d2724"
+    },
+    {
+      "path": "engine/math/Vector3.js",
+      "bytes": 9000,
+      "sha256": "722a14999ef3d104536bc5b68229d9449b353d7239b4c8e789308a337f2ab4b7"
+    },
+    {
+      "path": "engine/math/Vector4.js",
+      "bytes": 5450,
+      "sha256": "9f4b35fa073fa145d5dc70a8792fc66ea3f3d7046215da2ceb99ebeb70fea4be"
+    },
+    {
+      "path": "engine/math/index.js",
+      "bytes": 1004,
+      "sha256": "b1ba8b8e43cd878b7e57f66f6ac5c29d0ad37ad55ca33f05c6ed34ec7727a0af"
+    },
+    {
+      "path": "engine/render/Frame.js",
+      "bytes": 6212,
+      "sha256": "025d280465dc8a67a48de11067b754e9f1261859616fe595ff085e61c730109f"
+    },
+    {
+      "path": "engine/render/FullscreenPass.js",
+      "bytes": 4135,
+      "sha256": "99d96c753d8d409b9d9528aca027694d69873673d7b2f6620b559ae21aafeb8f"
+    },
+    {
+      "path": "engine/render/Material.js",
+      "bytes": 11822,
+      "sha256": "86e4a3d0f87d2b580f15d0cbf252be89ad982178ff188aac2c8db4ebfc6253d8"
+    },
+    {
+      "path": "engine/render/MeshRenderer.js",
+      "bytes": 28933,
+      "sha256": "b9f9b262e2a9ca2780d5e8af0bd43cab977e390e2ef61fb82680bbb770b0859e"
+    },
+    {
+      "path": "engine/render/MeshShader.js",
+      "bytes": 13780,
+      "sha256": "3ce0fcc5484bef5e603c6a893a43589285a4031d3dc55162c81e9cabd7ec7df7"
+    },
+    {
+      "path": "engine/render/SceneRenderer.js",
+      "bytes": 6754,
+      "sha256": "cc906196450a0a7d5242b53eb6bc779ba16b5c9273d8a3254a7e402751e7933d"
+    },
+    {
+      "path": "engine/render/Shadows.js",
+      "bytes": 7565,
+      "sha256": "88ac856a163172d95dd069d19bee279bb5942485679a292df7fb05517ea40deb"
+    },
+    {
+      "path": "engine/render/Skinning.js",
+      "bytes": 18709,
+      "sha256": "de5f3ca1c18a24ebcf74dcd63f342b534febfffd57453e8c434901f2cba96cc5"
+    },
+    {
+      "path": "engine/render/wgsl/common.js",
+      "bytes": 12116,
+      "sha256": "77eafb3c943019038170b592b9bc7347c66bea60c053c5135bc952aa96e1d458"
+    },
+    {
+      "path": "engine/render/wgsl/lighting.js",
+      "bytes": 21998,
+      "sha256": "a23d0b0739e0b550836e97fa4daf4d48a5fe25e2a46cca1dc074613973e0986c"
+    },
+    {
+      "path": "engine/scene/Camera.js",
+      "bytes": 7703,
+      "sha256": "329d5af76cea14ffd0dd61598827496e85374b907d4767b695747ef39d4a7f2d"
+    },
+    {
+      "path": "engine/scene/Group.js",
+      "bytes": 225,
+      "sha256": "04d99b85e3590b2fcca3c19c39517b6c48de55179e385f9bb6b1b1321b76cd70"
+    },
+    {
+      "path": "engine/scene/Layers.js",
+      "bytes": 543,
+      "sha256": "15fdaf6265c50f21654acdfc5195fbf121a4434ab30104e8743aaa2ff9694821"
+    },
+    {
+      "path": "engine/scene/Mesh.js",
+      "bytes": 3662,
+      "sha256": "f04f443319911edd1eca97fb2c166c496ff3d4ca2ca179185f6b1ee64bfb94f9"
+    },
+    {
+      "path": "engine/scene/Object3D.js",
+      "bytes": 11598,
+      "sha256": "78c79744e61a7ec84d49c883cdff677621a288ea5cbef115641d83e1f107c9a4"
+    },
+    {
+      "path": "engine/scene/Scene.js",
+      "bytes": 1256,
+      "sha256": "7b9fc67174331fbf18d1c76826ae866cfcf287ea487e338db34e9c0f11a14831"
+    },
+    {
+      "path": "engine/scene/index.js",
+      "bytes": 329,
+      "sha256": "551e01c9c1e0eced2adfb862cbbdf4e02f5951d59b55324e8bb43574198a28eb"
+    },
+    {
+      "path": "engine/webgpu.js",
+      "bytes": 1331,
+      "sha256": "b4cd25cd49b36bb1130051b38e8a5acdc77d44300124a6dae0404ebcd2591731"
+    },
+    {
+      "path": "LICENSE-tidewater.txt",
+      "bytes": 1104,
+      "sha256": "bf7d406711a4cbf9af0b9eb5f2cf464ae88053e999e0e64a92b3423494dd8699"
+    }
+  ]
+}

@@ -12,3 +12,12 @@ Thumbs.db
 *.blend1
 *.blend2
 
+
+.tools/
+.cache/
+.env
+.env.*
+*.blend1
+*.blend2
+__pycache__/
+*.pyc

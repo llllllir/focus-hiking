@@ -1,0 +1,13 @@
+{
+  "checks": [
+    "finite animal/cabin/rain/splash meshes",
+    "rain wet materials",
+    "animal shelter and duck landing",
+    "clear restores original materials",
+    "clear hides rain/lightning",
+    "cabin collision bounds"
+  ],
+  "meshes": 75,
+  "passed": true,
+  "scope": "CPU only; no browser, GPU or audio acceptance"
+}

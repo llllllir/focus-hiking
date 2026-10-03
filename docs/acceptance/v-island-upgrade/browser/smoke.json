@@ -1,0 +1,30 @@
+{
+  "shots": [
+    {
+      "view": "creek",
+      "ready": true,
+      "status": ""
+    },
+    {
+      "view": "canopy",
+      "ready": true,
+      "status": ""
+    },
+    {
+      "view": "moose",
+      "ready": true,
+      "status": ""
+    },
+    {
+      "view": "wetland",
+      "ready": true,
+      "status": ""
+    },
+    {
+      "view": "cabin",
+      "ready": true,
+      "status": ""
+    }
+  ],
+  "errors": []
+}

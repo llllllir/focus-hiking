@@ -1,0 +1,101 @@
+{
+  "files": [
+    {
+      "name": "great-tit",
+      "author": "D4XX",
+      "id": 607242,
+      "source": "https://freesound.org/people/D4XX/sounds/607242/",
+      "file": "public/audio/forest/great-tit.mp3",
+      "download": "https://cdn.freesound.org/previews/607/607242_887696-hq.mp3",
+      "format": "official HQ MP3 preview",
+      "license": "CC0-1.0",
+      "bytes": 49679,
+      "sha256": "12ccb18b5fb270bc11a07527169de356eac5e8def47057acebc86c1e41faa74c"
+    },
+    {
+      "name": "sparrows",
+      "author": "Kimskell",
+      "id": 628949,
+      "source": "https://freesound.org/people/Kimskell/sounds/628949/",
+      "file": "public/audio/forest/sparrows.mp3",
+      "download": "https://cdn.freesound.org/previews/628/628949_3311539-hq.mp3",
+      "format": "official HQ MP3 preview",
+      "license": "CC0-1.0",
+      "bytes": 265632,
+      "sha256": "4cffcc482d6639247fceaf4b2c92cee117acb58e1c39e1dbabc1a4daa4a6c993"
+    },
+    {
+      "name": "leaf-rustle",
+      "author": "giddster",
+      "id": 437356,
+      "source": "https://freesound.org/people/giddster/sounds/437356/",
+      "file": "public/audio/forest/leaf-rustle.mp3",
+      "download": "https://cdn.freesound.org/previews/437/437356_1738686-hq.mp3",
+      "format": "official HQ MP3 preview",
+      "license": "CC0-1.0",
+      "bytes": 188256,
+      "sha256": "86d26191a37bc0692d6b27048868fd520b6caead1dc685d9ae9048128b6c83fd"
+    },
+    {
+      "name": "quiet-stream",
+      "author": "kedart",
+      "id": 433602,
+      "source": "https://freesound.org/people/kedart/sounds/433602/",
+      "file": "public/audio/forest/quiet-stream.mp3",
+      "download": "https://cdn.freesound.org/previews/433/433602_8801908-hq.mp3",
+      "format": "official HQ MP3 preview",
+      "license": "CC0-1.0",
+      "bytes": 163104,
+      "sha256": "f0e39537fc2c00387995f2abf6d96d3daa86d34abddb36dc607347b4b042772e"
+    },
+    {
+      "name": "frog",
+      "author": "Benboncan",
+      "id": 67261,
+      "source": "https://freesound.org/people/Benboncan/sounds/67261/",
+      "license": "CC-BY-4.0",
+      "file": "public/audio/forest/frog.mp3",
+      "download": "https://cdn.freesound.org/previews/67/67261_634166-hq.mp3",
+      "format": "official HQ MP3 preview",
+      "bytes": 1298347,
+      "sha256": "cbb1e3c558277059c0d7307a5fa3300f840b16d25e27cb3b1e3748d22706b8b6"
+    },
+    {
+      "name": "peck",
+      "author": "johnaudiotech",
+      "id": 347047,
+      "source": "https://freesound.org/people/johnaudiotech/sounds/347047/",
+      "file": "public/audio/forest/peck.mp3",
+      "download": "https://cdn.freesound.org/previews/347/347047_6120286-hq.mp3",
+      "format": "official HQ MP3 preview",
+      "license": "CC0-1.0",
+      "bytes": 776750,
+      "sha256": "70fa855f74f98147217c991ce65a570b1b33db8a33c1872f066a7cbe5461f87c"
+    },
+    {
+      "name": "fox",
+      "author": "Setzilla",
+      "id": 173208,
+      "source": "https://freesound.org/people/Setzilla/sounds/173208/",
+      "file": "public/audio/forest/fox.mp3",
+      "download": "https://cdn.freesound.org/previews/173/173208_3230528-hq.mp3",
+      "format": "official HQ MP3 preview",
+      "license": "CC0-1.0",
+      "bytes": 53427,
+      "sha256": "7776d9ef68eed3173cda5dfb395975fe6b7b33ab7b3c64f904248f640cfe665c"
+    },
+    {
+      "name": "eagle",
+      "author": "1888software",
+      "id": 575525,
+      "source": "https://freesound.org/people/1888software/sounds/575525/",
+      "identification": "Red-tailed hawk recording; generic raptor reference, not independently verified eagle call",
+      "file": "public/audio/forest/eagle.mp3",
+      "download": "https://cdn.freesound.org/previews/575/575525_11447152-hq.mp3",
+      "format": "official HQ MP3 preview",
+      "license": "CC0-1.0",
+      "bytes": 37056,
+      "sha256": "e0f8ed19c24924c1926fa30f13dd9920c0127bd7e7c9cb2f46e4fc78d7255e52"
+    }
+  ]
+}

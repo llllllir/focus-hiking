@@ -1,0 +1,10 @@
+{
+  "sapling": {
+    "version": "0.3.7",
+    "source": "https://extensions.blender.org/add-ons/sapling-tree-gen/",
+    "download": "https://extensions.blender.org/download/sha256:27a478262e1c86612a9c3daffe7f4dce2802f5bc2294033462e5adc6d9c0080f/add-on-sapling-tree-gen-v0.3.7.zip",
+    "sha256": "27a478262e1c86612a9c3daffe7f4dce2802f5bc2294033462e5adc6d9c0080f",
+    "license": "GPL-3.0-or-later",
+    "usage": "Build-time Blender add-on; not included in browser distribution."
+  }
+}

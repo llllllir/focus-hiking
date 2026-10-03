@@ -1,0 +1,8 @@
+{
+  "terrain": {"basis":"design","why":"保持同图边界和三条路线；细分到约1.5m并缓和溪岸陡壁，坡面叠加多尺度起伏。","grid":320,"horizontalScale":3,"creekHalfWidth":1.35,"bankWidth":5.5,"detailAmplitude":0.32},
+  "vegetation": {"basis":"design","why":"以分枝树冠、交叉枝叶和林冠内部衬片替代规则枝条；按距离分级，减少集显填充。","seed":4419,"treeCandidates":1100,"leafAlphaTest":0.45,"nearDistance":45,"farDistance":150,"tileSize":72,"windAmplitude":0.055},
+  "lighting": {"basis":"design","why":"晴朗初夏侧光，天空环境反射补充林下漫反射，薄雾只表达远景空气。","sunIntensity":2.5,"hemisphereIntensity":1.55,"exposure":0.94,"fogNear":170,"fogFar":760,"shadowSize":2048},
+  "animals": {"basis":"design","why":"四足步态与路程绑定；活动包含停留、低头和缓慢巡游，限定在干地且避开行走障碍。","count":6,"speed":0.35,"stride":0.8,"surfaceHz":8},
+  "quality": {"basis":"design","why":"原画与现有渲染上限一致；高清／流畅仅减少昂贵的渲染细节，保持同一地图。","original":{},"high":{"maxWidth":1600,"maxHeight":1000,"shadowSize":1536,"nearDistance":35,"farDistance":130},"smooth":{"maxWidth":1280,"maxHeight":800,"shadowSize":1024,"nearDistance":24,"farDistance":110}},
+  "budgets": {"basis":"design","why":"保持项目60FPS目标，不以简化档替代原画验收；新增文件和绘制次数由检查脚本测量。","frameP95Ms":16.7,"maxSceneBytes":30000000,"maxMainDraws":220,"maxMainTriangles":1500000}
+}

@@ -1,0 +1,242 @@
+{
+  "source": "Original procedural models in wildlife.ts",
+  "sourceSha256": "ce592852a894e816d9d848dabc7830a8e396dd12e7a50318bc651ce1237d9f0d",
+  "license": "Original project asset; no third-party model license",
+  "rigging": "glTF skins; named joints; looping animation channels",
+  "records": [
+    {
+      "species": "carp",
+      "dimensionsMetres": 0.32,
+      "dimensionBasis": "design reference: eagle wingspan, deer shoulder height, other species body length",
+      "restBoundsMetres": {
+        "width": 0.15000000596046448,
+        "height": 0.16100000590085983,
+        "length": 0.3304276466369629
+      },
+      "joints": [
+        "carp_root",
+        "carp_head",
+        "carp_tail",
+        "carp_pectoral_-1",
+        "carp_pectoral_1"
+      ],
+      "vertices": 8765,
+      "materialGroups": 4,
+      "status": "original anatomical study; human anatomy review pending"
+    },
+    {
+      "species": "frog",
+      "dimensionsMetres": 0.065,
+      "dimensionBasis": "design reference: eagle wingspan, deer shoulder height, other species body length",
+      "restBoundsMetres": {
+        "width": 0.0967218428850174,
+        "height": 0.042000000132247806,
+        "length": 0.09724348783493042
+      },
+      "joints": [
+        "frog_root",
+        "frog_head",
+        "frog_tail",
+        "frog_fore_-1",
+        "frog_hind_-1",
+        "frog_fore_1",
+        "frog_hind_1"
+      ],
+      "vertices": 6828,
+      "materialGroups": 4,
+      "status": "original anatomical study; human anatomy review pending"
+    },
+    {
+      "species": "turtle",
+      "dimensionsMetres": 0.16,
+      "dimensionBasis": "design reference: eagle wingspan, deer shoulder height, other species body length",
+      "restBoundsMetres": {
+        "width": 0.22246022522449493,
+        "height": 0.09659999888390303,
+        "length": 0.22366002202033997
+      },
+      "joints": [
+        "turtle_root",
+        "turtle_head",
+        "turtle_tail",
+        "turtle_fore_-1",
+        "turtle_hind_-1",
+        "turtle_fore_1",
+        "turtle_hind_1"
+      ],
+      "vertices": 6372,
+      "materialGroups": 4,
+      "status": "original anatomical study; human anatomy review pending"
+    },
+    {
+      "species": "eagle",
+      "dimensionsMetres": 1.5,
+      "dimensionBasis": "design reference: eagle wingspan, deer shoulder height, other species body length",
+      "restBoundsMetres": {
+        "width": 1.6200000047683716,
+        "height": 0.2157600000500679,
+        "length": 0.5975788831710815
+      },
+      "joints": [
+        "eagle_root",
+        "eagle_head",
+        "eagle_tail",
+        "eagle_wing_-1_0",
+        "eagle_wing_1_0"
+      ],
+      "vertices": 8019,
+      "materialGroups": 4,
+      "status": "original anatomical study; human anatomy review pending"
+    },
+    {
+      "species": "woodpecker",
+      "dimensionsMetres": 0.23,
+      "dimensionBasis": "design reference: eagle wingspan, deer shoulder height, other species body length",
+      "restBoundsMetres": {
+        "width": 0.4222800135612488,
+        "height": 0.08895999938249588,
+        "length": 0.2668830454349518
+      },
+      "joints": [
+        "woodpecker_root",
+        "woodpecker_head",
+        "woodpecker_tail",
+        "woodpecker_wing_-1_0",
+        "woodpecker_wing_1_0"
+      ],
+      "vertices": 8241,
+      "materialGroups": 4,
+      "status": "original anatomical study; human anatomy review pending"
+    },
+    {
+      "species": "kingfisher",
+      "dimensionsMetres": 0.17,
+      "dimensionBasis": "design reference: eagle wingspan, deer shoulder height, other species body length",
+      "restBoundsMetres": {
+        "width": 0.3121199905872345,
+        "height": 0.06324000097811222,
+        "length": 0.1972830444574356
+      },
+      "joints": [
+        "kingfisher_root",
+        "kingfisher_head",
+        "kingfisher_tail",
+        "kingfisher_wing_-1_0",
+        "kingfisher_wing_1_0"
+      ],
+      "vertices": 8019,
+      "materialGroups": 4,
+      "status": "original anatomical study; human anatomy review pending"
+    },
+    {
+      "species": "dragonfly",
+      "dimensionsMetres": 0.065,
+      "dimensionBasis": "design reference: eagle wingspan, deer shoulder height, other species body length",
+      "restBoundsMetres": {
+        "width": 0.0860000029206276,
+        "height": 0.023203504271805286,
+        "length": 0.05430000089108944
+      },
+      "joints": [
+        "dragonfly_root",
+        "dragonfly_head",
+        "dragonfly_tail",
+        "dragonfly_wing_-1_0",
+        "dragonfly_wing_-1_1",
+        "dragonfly_wing_1_0",
+        "dragonfly_wing_1_1"
+      ],
+      "vertices": 2667,
+      "materialGroups": 4,
+      "status": "original anatomical study; human anatomy review pending"
+    },
+    {
+      "species": "deer",
+      "dimensionsMetres": 1,
+      "dimensionBasis": "design reference: eagle wingspan, deer shoulder height, other species body length",
+      "restBoundsMetres": {
+        "width": 0.3385951668024063,
+        "height": 1.2752499834168702,
+        "length": 1.8692499995231628
+      },
+      "joints": [
+        "deer_root",
+        "deer_head",
+        "deer_tail",
+        "deer_hind_-1",
+        "deer_fore_-1",
+        "deer_hind_1",
+        "deer_fore_1"
+      ],
+      "vertices": 20014,
+      "materialGroups": 3,
+      "status": "original anatomical study; human anatomy review pending"
+    },
+    {
+      "species": "hare",
+      "dimensionsMetres": 0.43,
+      "dimensionBasis": "design reference: eagle wingspan, deer shoulder height, other species body length",
+      "restBoundsMetres": {
+        "width": 0.13138621300458908,
+        "height": 0.4920000091660768,
+        "length": 0.7064500153064728
+      },
+      "joints": [
+        "hare_root",
+        "hare_head",
+        "hare_tail",
+        "hare_hind_-1",
+        "hare_fore_-1",
+        "hare_hind_1",
+        "hare_fore_1"
+      ],
+      "vertices": 4474,
+      "materialGroups": 3,
+      "status": "original anatomical study; human anatomy review pending"
+    },
+    {
+      "species": "squirrel",
+      "dimensionsMetres": 0.22,
+      "dimensionBasis": "design reference: eagle wingspan, deer shoulder height, other species body length",
+      "restBoundsMetres": {
+        "width": 0.07405273988842964,
+        "height": 0.24909999524243176,
+        "length": 0.41077904403209686
+      },
+      "joints": [
+        "squirrel_root",
+        "squirrel_head",
+        "squirrel_tail",
+        "squirrel_hind_-1",
+        "squirrel_fore_-1",
+        "squirrel_hind_1",
+        "squirrel_fore_1"
+      ],
+      "vertices": 4474,
+      "materialGroups": 3,
+      "status": "original anatomical study; human anatomy review pending"
+    },
+    {
+      "species": "fox",
+      "dimensionsMetres": 0.72,
+      "dimensionBasis": "design reference: eagle wingspan, deer shoulder height, other species body length",
+      "restBoundsMetres": {
+        "width": 0.22654855996370316,
+        "height": 0.49160000239498913,
+        "length": 1.1748000383377075
+      },
+      "joints": [
+        "fox_root",
+        "fox_head",
+        "fox_tail",
+        "fox_hind_-1",
+        "fox_fore_-1",
+        "fox_hind_1",
+        "fox_fore_1"
+      ],
+      "vertices": 4474,
+      "materialGroups": 3,
+      "status": "original anatomical study; human anatomy review pending"
+    }
+  ]
+}

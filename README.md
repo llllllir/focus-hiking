@@ -17,6 +17,8 @@
 ## 计划与研究
 
 - [总计划及个人里程碑](docs/development-plan.md)
+- [Phase 1 规格](specs/001-phase-1/spec.md) · [实施计划](specs/001-phase-1/plan.md) · [任务清单](specs/001-phase-1/tasks.md)
+- [偏写实森林视觉方向与参考资料](specs/001-phase-1/visual-direction.md)
 - [摄像头本地注视技术方案](docs/gaze-system.md)
 - [跨模块接口](docs/interfaces.md)
 - [学界与业界研究报告](docs/research.md) · [阅读版 HTML](docs/research.html)
@@ -25,11 +27,35 @@
 
 ## 当前实现状态
 
-本次初始化交付研究、计划、任务和 agent 规则。应用源码尚未实现，暂不存在 `npm run dev` 等应用启动命令。M1-A 必须建立并记录安装、启动、类型检查和构建命令，M1-B 交付首个可运行场景。
+原初版已命名为 **框架场景1.0**。当前探索迭代增加自由转头、WASD 行走、目的地沿路径自动移动，以及同一地图的溪谷主路、苔岩环线和山坡观景路。点击开始后，左侧选择“自由探索”或目的地；拖动画面转头。真实眼动未接入，画质和画风尚未达到用户验收。[提高后的场景标准](docs/scene-upgrade.md)
+
+已建立 M1 初版工程、共享契约、模拟诊断及森林自动游览。场景资源由 Blender 脚本制作；视觉基准、真人体验与总阶段验收仍待确认。详细状态见 [v0.1 记录](docs/acceptance/v0.1/README.md)。
+
+## 本地运行
+
+要求 Node.js 22.12+ 或 Node.js 24 与 npm。在仓库根目录执行：
+
+```powershell
+npm ci
+npm run dev
+```
+
+打开终端给出的本地地址。点击开始，暂停/恢复或回到起点；约两分钟自动游览。开发诊断明确标记 simulated，不申请摄像头、不使用真实注视驱动路线。
+
+```powershell
+npm run typecheck
+npm test
+npm run build
+npm run preview
+```
+
+资源重新制作：在安装 Blender 的环境执行 `blender --background --python src/scene/build_forest.py`；增加 `-- --render` 生成 Eevee 对照。脚本使用本地素材，不需要下载插件。保持可编辑源工程与资产记录，参见 [场景素材](src/scene/ASSETS.md)。
+
+界面规范见 [DESIGN](DESIGN.md)。固定审阅视角可用 `?view=camp`、`?view=trail`、`?view=creek`；浏览器与 Eevee 图片须人工比对后才能宣布画质达标。
 
 第一版不做路线导航、社交、排名、多地图或智能手表接入。摄像头图像不保存、不上传。注视行为与游戏表现不等于心理注意力，更不能证明长期训练效果。
 
 
-## M1-A 工程预览
+## 秋季生态升级保存
 
-已建立 TS/Vite/Three.js 工程、契约初始类型与明确 simulated 的诊断。npm ci、npm run dev、npm run typecheck、npm test、npm run build 是运行入口。A 单独构建和三项测试已通过；森林场景由 B 集成分支接入。共享契约等待 B 真人审查，摄像头未实现。
+原生 WebGPU、天气、动物骨架、生态、自然声音和地图偏离提示见 [详细开发记录](docs/scene-ecology-upgrade.md)。自动化检查可审阅；写实外观、听感、真人眼动与原画性能仍未通过验收。此保存不合并、不关闭阶段，后续眼动徒步待接入。

@@ -1,0 +1,16 @@
+{
+  "gpu": "ANGLE (Intel, Intel(R) UHD Graphics (0x0000A788) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+  "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36 Edg/154.0.0.0",
+  "drawingBuffer": [
+    1920,
+    1200
+  ],
+  "frames": 3600,
+  "measuredSeconds": 114.0996,
+  "fps": 31.551381424650046,
+  "frameTimeP95Ms": 43.19999999999709,
+  "slowFramesOver33ms": 824,
+  "quality": "default",
+  "environment": "headless Edge automatic tour, no camera, not human joint acceptance",
+  "scene60fpsPassed": false
+}

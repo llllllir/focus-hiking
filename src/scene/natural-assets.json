@@ -1,0 +1,92 @@
+[
+  {
+    "file": "public/assets/textures/forest_ground_04_diff_1k.jpg",
+    "source": "https://polyhaven.com/a/forest_ground_04",
+    "download": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/forest_ground_04/forest_ground_04_diff_1k.jpg",
+    "license": "CC0-1.0",
+    "author": "Rob Tuytel, Rico Cilliers",
+    "sha256": "50a4dda30875020c64385261aa7e00e2155b592302fa6794165f58fae73cbd2c",
+    "bytes": 1113899,
+    "obtained": "2026-10-03"
+  },
+  {
+    "file": "public/assets/textures/forest_ground_04_nor_gl_1k.jpg",
+    "source": "https://polyhaven.com/a/forest_ground_04",
+    "download": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/forest_ground_04/forest_ground_04_nor_gl_1k.jpg",
+    "license": "CC0-1.0",
+    "author": "Rob Tuytel, Rico Cilliers",
+    "sha256": "9c3a0200e02ce40edffbbf9f5f623ef08ea9b1b7812b556182ec978f88887151",
+    "bytes": 1326812,
+    "obtained": "2026-10-03"
+  },
+  {
+    "file": "public/assets/textures/forest_ground_04_rough_1k.jpg",
+    "source": "https://polyhaven.com/a/forest_ground_04",
+    "download": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/forest_ground_04/forest_ground_04_rough_1k.jpg",
+    "license": "CC0-1.0",
+    "author": "Rob Tuytel, Rico Cilliers",
+    "sha256": "89d4d50395eb92824a64132c4bc8a5a09009071e0b325ab66dc3104c7a3090ed",
+    "bytes": 627507,
+    "obtained": "2026-10-03"
+  },
+  {
+    "file": "public/assets/textures/bark_brown_02_diff_1k.jpg",
+    "source": "https://polyhaven.com/a/bark_brown_02",
+    "download": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/bark_brown_02/bark_brown_02_diff_1k.jpg",
+    "license": "CC0-1.0",
+    "author": "Rob Tuytel",
+    "sha256": "920fa0bed0c9d78c1d530e99795113afd532d7db746de440f4a85d7c83ed0f1a",
+    "bytes": 659592,
+    "obtained": "2026-10-03"
+  },
+  {
+    "file": "public/assets/textures/bark_brown_02_nor_gl_1k.jpg",
+    "source": "https://polyhaven.com/a/bark_brown_02",
+    "download": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/bark_brown_02/bark_brown_02_nor_gl_1k.jpg",
+    "license": "CC0-1.0",
+    "author": "Rob Tuytel",
+    "sha256": "0d5e691e8ad8bcd093a3587887fda2a6b4a948b5708a4f256f7919584c6eb857",
+    "bytes": 1015623,
+    "obtained": "2026-10-03"
+  },
+  {
+    "file": "public/assets/textures/bark_brown_02_rough_1k.jpg",
+    "source": "https://polyhaven.com/a/bark_brown_02",
+    "download": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/bark_brown_02/bark_brown_02_rough_1k.jpg",
+    "license": "CC0-1.0",
+    "author": "Rob Tuytel",
+    "sha256": "68125592de36e15bae7aa6db85c4d135aeb7e5653199ba226483a70f6d69837d",
+    "bytes": 337946,
+    "obtained": "2026-10-03"
+  },
+  {
+    "file": "public/assets/textures/rocky_terrain_02_diff_1k.jpg",
+    "source": "https://polyhaven.com/a/rocky_terrain_02",
+    "download": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rocky_terrain_02/rocky_terrain_02_diff_1k.jpg",
+    "license": "CC0-1.0",
+    "author": "Amal Kumar",
+    "sha256": "d570c10b1d5302f4fde9e0e94f4cbab0d5e112fc3fe2b3b91c38a98bd3ddaf4b",
+    "bytes": 843188,
+    "obtained": "2026-10-03"
+  },
+  {
+    "file": "public/assets/textures/rocky_terrain_02_nor_gl_1k.jpg",
+    "source": "https://polyhaven.com/a/rocky_terrain_02",
+    "download": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rocky_terrain_02/rocky_terrain_02_nor_gl_1k.jpg",
+    "license": "CC0-1.0",
+    "author": "Amal Kumar",
+    "sha256": "f4f9d9671c660f4e509e96d5da3091887dfd557e1353e313fa2d1dc789499ffd",
+    "bytes": 993692,
+    "obtained": "2026-10-03"
+  },
+  {
+    "file": "public/assets/textures/rocky_terrain_02_rough_1k.jpg",
+    "source": "https://polyhaven.com/a/rocky_terrain_02",
+    "download": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rocky_terrain_02/rocky_terrain_02_rough_1k.jpg",
+    "license": "CC0-1.0",
+    "author": "Amal Kumar",
+    "sha256": "8652ee05de206888eb77f84df7c8080f6ffef27afadb7917127726570b66c45d",
+    "bytes": 437094,
+    "obtained": "2026-10-03"
+  }
+]

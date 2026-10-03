@@ -1,0 +1,246 @@
+{
+  "sceneRevision": "forest-weather-ecology-rig-1",
+  "checks": [
+    "eight local recordings load; sunny loops and a scheduled bird snippet start from a user gesture",
+    "eleven rigged species, age variants and dense ecology are present in the running scene",
+    "map marker matches body position and exposes route distance",
+    "overview and position-follow modes toggle",
+    "weather changes preserve navigation position",
+    "clear restoration and mute"
+  ],
+  "assets": [
+    {
+      "file": "great-tit.mp3",
+      "status": 200
+    },
+    {
+      "file": "peck.mp3",
+      "status": 200
+    },
+    {
+      "file": "quiet-stream.mp3",
+      "status": 200
+    },
+    {
+      "file": "sparrows.mp3",
+      "status": 200
+    },
+    {
+      "file": "leaf-rustle.mp3",
+      "status": 200
+    },
+    {
+      "file": "fox.mp3",
+      "status": 200
+    },
+    {
+      "file": "eagle.mp3",
+      "status": 200
+    },
+    {
+      "file": "frog.mp3",
+      "status": 200
+    }
+  ],
+  "audio": [
+    {
+      "state": "running",
+      "sources": 5,
+      "sampleRate": 48000
+    },
+    {
+      "state": "running",
+      "sources": 4,
+      "sampleRate": 48000
+    }
+  ],
+  "ecology": {
+    "counts": {
+      "pebbles": 700,
+      "grass": 24000,
+      "ferns": 6000,
+      "shrubs": 1100,
+      "litter": 12000,
+      "mossPatches": 3500,
+      "saplings": 240,
+      "acorns": 70,
+      "cones": 40,
+      "beetles": 17,
+      "worms": 8,
+      "footprints": 54
+    },
+    "ancientTrees": 20
+  },
+  "wildlife": [
+    {
+      "species": "carp",
+      "age": "adult",
+      "joints": 5
+    },
+    {
+      "species": "carp",
+      "age": "adult",
+      "joints": 5
+    },
+    {
+      "species": "carp",
+      "age": "adult",
+      "joints": 5
+    },
+    {
+      "species": "carp",
+      "age": "juvenile",
+      "joints": 5
+    },
+    {
+      "species": "carp",
+      "age": "juvenile",
+      "joints": 5
+    },
+    {
+      "species": "carp",
+      "age": "juvenile",
+      "joints": 5
+    },
+    {
+      "species": "carp",
+      "age": "juvenile",
+      "joints": 5
+    },
+    {
+      "species": "carp",
+      "age": "juvenile",
+      "joints": 5
+    },
+    {
+      "species": "carp",
+      "age": "juvenile",
+      "joints": 5
+    },
+    {
+      "species": "carp",
+      "age": "juvenile",
+      "joints": 5
+    },
+    {
+      "species": "carp",
+      "age": "juvenile",
+      "joints": 5
+    },
+    {
+      "species": "carp",
+      "age": "juvenile",
+      "joints": 5
+    },
+    {
+      "species": "carp",
+      "age": "juvenile",
+      "joints": 5
+    },
+    {
+      "species": "carp",
+      "age": "juvenile",
+      "joints": 5
+    },
+    {
+      "species": "carp",
+      "age": "juvenile",
+      "joints": 5
+    },
+    {
+      "species": "carp",
+      "age": "juvenile",
+      "joints": 5
+    },
+    {
+      "species": "carp",
+      "age": "juvenile",
+      "joints": 5
+    },
+    {
+      "species": "carp",
+      "age": "juvenile",
+      "joints": 5
+    },
+    {
+      "species": "carp",
+      "age": "juvenile",
+      "joints": 5
+    },
+    {
+      "species": "frog",
+      "age": "adult",
+      "joints": 7
+    },
+    {
+      "species": "turtle",
+      "age": "adult",
+      "joints": 7
+    },
+    {
+      "species": "eagle",
+      "age": "adult",
+      "joints": 5
+    },
+    {
+      "species": "kingfisher",
+      "age": "adult",
+      "joints": 5
+    },
+    {
+      "species": "dragonfly",
+      "age": "adult",
+      "joints": 7
+    },
+    {
+      "species": "dragonfly",
+      "age": "adult",
+      "joints": 7
+    },
+    {
+      "species": "woodpecker",
+      "age": "adult",
+      "joints": 5
+    },
+    {
+      "species": "deer",
+      "age": "adult",
+      "joints": 7
+    },
+    {
+      "species": "deer",
+      "age": "adult",
+      "joints": 7
+    },
+    {
+      "species": "deer",
+      "age": "juvenile",
+      "joints": 7
+    },
+    {
+      "species": "deer",
+      "age": "subadult",
+      "joints": 7
+    },
+    {
+      "species": "hare",
+      "age": "adult",
+      "joints": 7
+    },
+    {
+      "species": "squirrel",
+      "age": "adult",
+      "joints": 7
+    },
+    {
+      "species": "fox",
+      "age": "adult",
+      "joints": 7
+    }
+  ],
+  "loadedMs": 5951.70000000298,
+  "errors": [],
+  "input": "scripted manual UI, no camera",
+  "visualAcceptance": "not-reviewed",
+  "audioAcceptance": "not-listened"
+}

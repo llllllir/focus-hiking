@@ -1,0 +1,104 @@
+{
+  "source": "simulated camera-shaped fixture; fifteen-minute completion uses synthetic clock fast-forward, no real camera accuracy or joint-inference acceptance",
+  "checks": [
+    "5/10/15 selector and denied-camera gate",
+    "real terrain gaze-direction movement and right turn",
+    "off-screen stop with cloudy thunder, no rain",
+    "early return restores clear",
+    "sensor invalid stops without departure",
+    "pause time and resume",
+    "sustained 30-second feedback cap, no WASD bypass",
+    "running audio contexts and synchronized distant/near thunder schedule",
+    "early finish, duplicate prevention, automatic finish with synthetic clock, next duration, reload archive",
+    "same-page GPU scene disposal and recreation",
+    "synthetic history excluded from real progress",
+    "manual scene/map/weather regression"
+  ],
+  "saved": {
+    "version": 1,
+    "records": [
+      {
+        "version": 1,
+        "id": "9580632e-459d-4daa-a7fc-90e50d0bfbb8",
+        "source": "simulated",
+        "startedAt": "2026-10-04T02:29:16.210Z",
+        "plannedMinutes": 5,
+        "outcome": "stopped",
+        "elapsedMs": 39394.80000001192,
+        "onScreenMs": 5870,
+        "offScreenMs": 32201.20000000298,
+        "unknownMs": 1323.6000000089407,
+        "departures": 2,
+        "recoveries": 2,
+        "distanceM": 6.069239999999892,
+        "focusRatio": 0.15418479060285833,
+        "coverageRatio": 0.9664016570712749,
+        "averageFps": 40.10508547713629
+      },
+      {
+        "version": 1,
+        "id": "77b850d2-3ed4-474e-ab7c-6be5ad59cac2",
+        "source": "simulated",
+        "startedAt": "2026-10-04T02:29:56.930Z",
+        "plannedMinutes": 15,
+        "outcome": "completed",
+        "elapsedMs": 900000,
+        "onScreenMs": 189.90000000596046,
+        "offScreenMs": 0,
+        "unknownMs": 899810.099999994,
+        "departures": 0,
+        "recoveries": 0,
+        "distanceM": 0,
+        "focusRatio": 1,
+        "coverageRatio": 0.00021100000000662275,
+        "averageFps": null
+      }
+    ]
+  },
+  "performance": {
+    "samples": 1580,
+    "averageFps": 40.10508547713629,
+    "frameP95Ms": 42.5,
+    "drawingBuffer": [
+      800,
+      500
+    ],
+    "gpu": "{\"vendor\":\"intel\",\"architecture\":\"gen-12lp\",\"device\":\"\",\"description\":\"\"}",
+    "autoLevel": 2
+  },
+  "audio": {
+    "contexts": [
+      "running",
+      "running"
+    ],
+    "thunder": [
+      {
+        "delay": 2.3999999999999995,
+        "seconds": 7
+      },
+      {
+        "delay": 4.500000000000001,
+        "seconds": 5
+      },
+      {
+        "delay": 7.8,
+        "seconds": 2.8
+      },
+      {
+        "delay": 2.4000000000000004,
+        "seconds": 7
+      },
+      {
+        "delay": 4.5,
+        "seconds": 5
+      },
+      {
+        "delay": 7.800000000000001,
+        "seconds": 2.8
+      }
+    ]
+  },
+  "errors": [],
+  "visualAcceptance": "not-reviewed",
+  "audioListening": "not-reviewed"
+}

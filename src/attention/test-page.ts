@@ -49,10 +49,10 @@ export function mountGazeTest(parent: HTMLElement, options: { onSceneReady?: (ca
     <header class="gaze-heading"><a href="/">FOCUS HIKING</a><span>校准 → 验证 → 场景交互</span></header>
     <div class="gaze-axis-label gaze-left">向左看</div><div class="gaze-axis-label gaze-right">向右看</div>
     <div class="gaze-crosshair" aria-hidden="true"></div><div class="gaze-ball is-invalid" aria-label="注视跟随球"></div>
-    <section class="gaze-intro"><p class="gaze-eyebrow">FOLLOW YOUR GAZE</p><h1>让目光，带动小球。</h1><p>先进入全屏，保持舒适坐姿。<br>完成位置与屏幕内外校准，验证后启用注视交互。</p></section>
+    <section class="gaze-intro"><p class="gaze-eyebrow">FOLLOW YOUR GAZE</p><h1>让目光，带动小球。</h1><p>进入全屏 → 开启摄像头 → 连续校准与验证。<br>跟随圆点；切到后台会暂停，回来只需重试当前点。</p></section>
     <section class="gaze-controls" aria-label="眼动控制"><div class="gaze-status" role="status" aria-live="polite">进入全屏并开启摄像头，开始校准。</div>
       <div class="gaze-control-row"><button data-action="fullscreen">进入全屏</button><button class="gaze-primary" data-action="start">开启摄像头</button>
-      <button data-action="calibrate" disabled>九点校准</button><button data-action="validate" disabled>五点验证</button><button data-action="stop" disabled>停止</button></div>
+      <button class="gaze-primary" data-action="guided" disabled>连续校准与验证</button><button data-action="calibrate" disabled>九点校准</button><button data-action="validate" disabled>五点验证</button><button data-action="stop" disabled>停止</button></div>
       <div class="gaze-control-row"><button data-action="screen-calibrate" disabled>屏幕内外校准</button><button data-action="screen-validate" disabled>屏幕状态验证</button>
       <button data-action="drift" disabled>中央复查</button><button data-action="scene" disabled>${options.onSceneReady ? '进入森林交互' : '启用三目标交互'}</button></div>
       <div class="gaze-control-row gaze-secondary"><label>推理 <select data-setting="delegate"><option value="CPU">CPU / WASM</option><option value="GPU">GPU</option></select></label>
@@ -80,14 +80,19 @@ export function mountGazeTest(parent: HTMLElement, options: { onSceneReady?: (ca
   let pointMeasurements = new Map<number, MeasurementRow>(), pointScreen = new Map<number, ScreenMeasurement>();
   let processingTimes: number[] = [], pipelineTimes: number[] = [], sampleTimes: number[] = [], lastPaint = 0;
   let audio: AudioContext | null = null;
+  let guided = false, suspended = false;
+  // Evaluate coverage at the supported 10 Hz floor, not the 15 Hz scheduler target.
+  // Empty time bins still count as invalid; errors and accuracy gates are unchanged.
+  const samplePeriodMs = 100;
   const settleMs = () => task === 'screen-validation' || target?.inside === false ? 800 : 400;
   const durationMs = () => task === 'screen-validation' || target?.inside === false ? 2600 : 1500;
-  const slots = () => Math.ceil((durationMs() - settleMs()) / (1000 / 15));
+  const slots = () => Math.ceil((durationMs() - settleMs()) / samplePeriodMs);
   const controls = () => {
     button('fullscreen').textContent = document.fullscreenElement ? '退出全屏' : '进入全屏';
     button('start').disabled = starting || started;
     button('stop').disabled = !(starting || started);
     button('calibrate').disabled = !started || !!task;
+    button('guided').disabled = !started || !!task || !document.fullscreenElement;
     button('validate').disabled = !started || !mapping || !!task;
     button('screen-calibrate').disabled = !started || !mapping || !!task || !document.fullscreenElement;
     button('screen-validate').disabled = !started || !screenCalibrated || !!task || !document.fullscreenElement;
@@ -102,6 +107,8 @@ export function mountGazeTest(parent: HTMLElement, options: { onSceneReady?: (ca
     get('.gaze-demo-targets').hidden = true; rows = []; allFeatures = []; screenRows = []; screenSeeds = []; pointFeatures = [];
   }
   const camera = new CameraAttention(update => {
+    // The camera continues publishing to the game; the hidden setup needs no DOM work.
+    if (parent.hidden) return;
     const { sample, features, position, screen } = update;
     if (!features) camera.drawEyePreview(get<HTMLCanvasElement>('.gaze-eye-preview'), null);
     root.classList.toggle('has-eyes', !!features);
@@ -126,8 +133,9 @@ export function mountGazeTest(parent: HTMLElement, options: { onSceneReady?: (ca
       const canvas = get<HTMLCanvasElement>('.gaze-eye-preview'); canvas.hidden = !get<HTMLInputElement>('[data-setting="eye-preview"]').checked;
       camera.drawEyePreview(canvas, canvas.hidden ? null : features);
     }
-  }, message => { status.textContent = message; if (!camera.running && !starting) { started = false; resetCalibration(); cancelTask(); } controls(); });
+  }, message => { status.textContent = message; if (!camera.running && !starting) { guided = false; started = false; resetCalibration(); cancelTask(); } controls(); });
   const offEvents = camera.subscribeEvents(event => {
+    if (parent.hidden) return;
     get('.gaze-interaction-report').textContent = `${event.type} · ${event.targetId ?? '—'} · ${Math.round(event.progress * 100)}%`;
     root.querySelectorAll<HTMLElement>('[data-gaze-target]').forEach(el => { el.style.setProperty('--dwell', `${el.dataset.gazeTarget === event.targetId ? event.progress * 100 : 0}%`); el.classList.toggle('confirmed', event.type === 'targetConfirmed' && el.dataset.gazeTarget === event.targetId); });
   });
@@ -135,7 +143,7 @@ export function mountGazeTest(parent: HTMLElement, options: { onSceneReady?: (ca
     if (!task || !target || waiting || document.hidden) return;
     const elapsed = update.sample.timestampMs - pointStart;
     if (elapsed < settleMs() || elapsed > durationMs()) return;
-    const slot = Math.floor((elapsed - settleMs()) / (1000 / 15));
+    const slot = Math.floor((elapsed - settleMs()) / samplePeriodMs);
     if (task === 'calibration' || task === 'screen-calibration') {
       if (update.features && update.sensorValid) pointFeatures.push(update.features);
     } else if (task === 'screen-validation') {
@@ -147,7 +155,13 @@ export function mountGazeTest(parent: HTMLElement, options: { onSceneReady?: (ca
     }
   }
   function positionBall(x: number, y: number) { ball.style.left = `${x * root.clientWidth}px`; ball.style.top = `${y * root.clientHeight}px`; }
-  function cancelTask() { cancelAnimationFrame(taskFrame); taskFrame = 0; task = null; target = null; waiting = false; overlay.hidden = true; root.classList.remove('is-task'); pointFeatures = []; controls(); }
+  function cancelTask() { cancelAnimationFrame(taskFrame); taskFrame = 0; task = null; target = null; waiting = false; suspended = false; overlay.hidden = true; root.classList.remove('is-task'); pointFeatures = []; controls(); }
+  function pausePoint(message: string) {
+    cancelAnimationFrame(taskFrame); taskFrame = 0; waiting = true; suspended = true;
+    pointFeatures = []; pointMeasurements.clear(); pointScreen.clear();
+    get('.gaze-task-instruction').textContent = message;
+    button('sample').textContent = '重试当前点'; button('sample').hidden = false;
+  }
   function tone() { if (!audio || audio.state !== 'running') return; const osc = audio.createOscillator(), gain = audio.createGain(); gain.gain.value = .035; osc.frequency.value = 660; osc.connect(gain).connect(audio.destination); osc.start(); osc.stop(audio.currentTime + .12); }
   function beginPoint() {
     target = queue[pointIndex]; pointFeatures = []; pointMeasurements = new Map(); pointScreen = new Map();
@@ -155,26 +169,26 @@ export function mountGazeTest(parent: HTMLElement, options: { onSceneReady?: (ca
     dot.hidden = target.inside === false; dot.style.left = `${target.x * 100}%`; dot.style.top = `${target.y * 100}%`;
     get('.gaze-task-instruction').textContent = target.instruction ?? (task === 'calibration' ? '注视圆点，保持头部基本稳定。' : '独立采样：持续注视圆点。');
     get('.gaze-task-progress').textContent = `${pointIndex + 1} / ${queue.length}${retries ? ` · 本点重试 ${retries}/2` : ''}`;
-    waiting = !!target.instruction; button('sample').hidden = !waiting; pointStart = performance.now();
+    waiting = !!target.instruction; button('sample').textContent = '开始此项'; button('sample').hidden = !waiting; pointStart = performance.now();
     if (!waiting) taskFrame = requestAnimationFrame(advanceTask);
   }
-  button('sample').onclick = () => { if (!task || !waiting) return; waiting = false; button('sample').hidden = true; pointStart = performance.now(); taskFrame = requestAnimationFrame(advanceTask); };
+  button('sample').onclick = () => { if (!task || !waiting || document.hidden) return; if (suspended) { suspended = false; retries = 0; beginPoint(); if (!waiting) return; } waiting = false; button('sample').hidden = true; pointStart = performance.now(); taskFrame = requestAnimationFrame(advanceTask); };
   function advanceTask() {
     if (!task || !target) return;
     const progress = clamp((performance.now() - pointStart) / durationMs()); dot.style.setProperty('--point-progress', `${progress * 360}deg`);
     if (progress < 1) { taskFrame = requestAnimationFrame(advanceTask); return; }
     if (task === 'calibration' || task === 'screen-calibration') {
       const indices = stableSamples(pointFeatures, !!target.headMotion);
-      if (indices.length < 8 || indices.length / slots() < .6) {
+      if (indices.length < 10 || indices.length / pointFeatures.length < .6) {
         if (retries++ < 2) { tone(); beginPoint(); return; }
-        cancelTask(); status.textContent = '该点样本不足或不稳定，已停止本轮。请检查光照、坐姿和眼部遮挡后重试。'; return;
+        pausePoint('该点样本不足或不稳定。请检查光照、坐姿和眼部遮挡，再重试当前点；之前的进度已保留。'); return;
       }
       const selected = indices.map(i => pointFeatures[i]);
       if (task === 'calibration') { rows.push(...selected.map(f => ({ features: [...f.vector], x: target!.x, y: target!.y, targetId: target!.id, round: target!.round }))); allFeatures.push(...selected); }
       else screenRows.push(...selected.map(features => ({ features, targetId: target!.id, round: target!.round!, inside: target!.inside! })));
     } else if (task === 'screen-validation') {
-      for (let i = 0; i < slots(); i++) screenMeasurements.push(pointScreen.get(i) ?? { targetId: target.id, inside: target.inside!, state: 'unknown', reason: 'missing-sample', timestampMs: pointStart + settleMs() + i * 1000 / 15 });
-    } else for (let i = 0; i < slots(); i++) validationRows.push(pointMeasurements.get(i) ?? { timestampMs: pointStart + settleMs() + i * 1000 / 15, targetId: target.id, targetX: target.x, targetY: target.y,
+      for (let i = 0; i < slots(); i++) screenMeasurements.push(pointScreen.get(i) ?? { targetId: target.id, inside: target.inside!, state: 'unknown', reason: 'missing-sample', timestampMs: pointStart + settleMs() + i * samplePeriodMs });
+    } else for (let i = 0; i < slots(); i++) validationRows.push(pointMeasurements.get(i) ?? { timestampMs: pointStart + settleMs() + i * samplePeriodMs, targetId: target.id, targetX: target.x, targetY: target.y,
       x: null, y: null, valid: false, reason: 'missing-sample', width: root.clientWidth, height: root.clientHeight, processingMs: 0, pipelineMs: 0 });
     tone(); retries = 0; pointIndex++;
     if (pointIndex < queue.length) { beginPoint(); return; }
@@ -203,8 +217,18 @@ export function mountGazeTest(parent: HTMLElement, options: { onSceneReady?: (ca
         get('.gaze-report').textContent = `${completed === 'drift' ? '中央复查' : '独立五点验证'}：${summary.valid}/${summary.total} 有效（${percent(summary.validRate)}）\n中位误差 ${percent(summary.median)} · P90 ${percent(summary.p90)} 对角线\n${passed ? '本次数值达到位置门槛，仍待多人验收。' : '本次未达门槛，请重新校准。'}`;
         status.textContent = completed === 'drift' ? '中央复查完成。复查不会自动训练或修改校准。' : '五点验证完成。可下载匿名测量 CSV。';
       }
-    } catch (error) { status.textContent = error instanceof Error ? error.message : String(error); }
+    } catch (error) { guided = false; status.textContent = error instanceof Error ? error.message : String(error); }
     rows = []; allFeatures = []; screenRows = []; pointFeatures = []; get<HTMLDetailsElement>('.gaze-metrics').open = true; controls();
+    if (guided) {
+      if (completed === 'calibration' && mapping) beginTask('validation');
+      else if (completed === 'validation' && positionPassed) beginTask('screen-calibration');
+      else if (completed === 'screen-calibration' && screenCalibrated) beginTask('screen-validation');
+      else {
+        guided = false;
+        status.textContent = positionPassed && screenPassed ? '校准与独立验证已通过，点击“进入徒步”开始。' : '验证未通过，交互保持关闭。请查看测量结果，仅重试未通过的阶段。';
+        if (positionPassed && screenPassed) button('scene').focus();
+      }
+    }
   }
   function beginTask(kind: Task) {
     if (!started || (kind !== 'calibration' && !mapping) || (kind.startsWith('screen') && !document.fullscreenElement)) return;
@@ -216,8 +240,9 @@ export function mountGazeTest(parent: HTMLElement, options: { onSceneReady?: (ca
       resetCalibration(); camera.setMapping(null);
       const poses: Target[] = ['向左', '向右', '向上', '向下'].map((direction, i) => ({ id: `pose${i}`, x: .5, y: .5, headMotion: true,
         instruction: `眼睛持续看中央圆点，头部${direction}轻转约 5 度并保持。读完后点击开始此项。` }));
-      queue = [0, 1].flatMap(round => [...shuffle(calibrationTargets), ...poses].map(t => ({ ...t, round })));
-    } else if (kind === 'screen-calibration') { screenPassed = false; screenCalibrated = false; screenRows = [...screenSeeds]; camera.setScreenMapping(null); queue = [0, 1].flatMap(round => shuffle(screenTargets).map(t => ({ ...t, round }))); }
+      // Keep two complete spatial rounds; sample each pose once with enough samples.
+      queue = [...[0, 1].flatMap(round => shuffle(calibrationTargets).map(t => ({ ...t, round }))), ...poses.map(t => ({ ...t, round: 0 }))];
+    } else if (kind === 'screen-calibration') { screenPassed = false; screenCalibrated = false; screenRows = [...screenSeeds]; camera.setScreenMapping(null); queue = [0, 1].flatMap(round => shuffle(screenTargets.filter(t => !t.inside)).map(t => ({ ...t, round }))); }
     else if (kind === 'screen-validation') { screenPassed = false; camera.verifyScreen(false); screenMeasurements = []; queue = shuffle(screenTargets.map(t => t.inside ? { ...t, x: .5 + (t.x - .5) * .8, y: .5 + (t.y - .5) * .8 } : { ...t })); }
     else { validationRows = []; if (kind === 'validation') { positionPassed = false; camera.verifyPosition(false); } queue = kind === 'drift' ? [{ id: 'drift', x: .5, y: .5 }] : shuffle(validationTargets); }
     overlay.hidden = false; root.classList.add('is-task'); controls(); beginPoint();
@@ -230,11 +255,12 @@ export function mountGazeTest(parent: HTMLElement, options: { onSceneReady?: (ca
     catch (error) { if (operation !== startOperation || disposed) return; status.textContent = error instanceof DOMException && error.name === 'NotAllowedError' ? '摄像头权限被拒绝，请在地址栏允许后重试。' : error instanceof Error ? error.message : String(error); }
     finally { if (operation === startOperation) { starting = false; if (!disposed) controls(); } }
   };
-  const stopCamera = () => { startOperation++; cancelTask(); camera.stop(); resetCalibration(); started = false; starting = false; status.textContent = '摄像头已停止，校准参数已清除。'; controls(); };
+  const stopCamera = () => { guided = false; startOperation++; cancelTask(); camera.stop(); resetCalibration(); started = false; starting = false; status.textContent = '摄像头已停止，校准参数已清除。'; controls(); };
   button('stop').onclick = stopCamera;
   button('calibrate').onclick = () => beginTask('calibration'); button('validate').onclick = () => beginTask('validation');
+  button('guided').onclick = () => { guided = true; beginTask(mapping ? !positionPassed ? 'validation' : !screenCalibrated ? 'screen-calibration' : 'screen-validation' : 'calibration'); };
   button('screen-calibrate').onclick = () => beginTask('screen-calibration'); button('screen-validate').onclick = () => beginTask('screen-validation'); button('drift').onclick = () => beginTask('drift');
-  button('cancel').onclick = () => { cancelTask(); rows = []; allFeatures = []; screenRows = []; status.textContent = '本轮采样已取消，未形成完整验证报告。'; };
+  button('cancel').onclick = () => { guided = false; cancelTask(); rows = []; allFeatures = []; screenRows = []; status.textContent = '本轮采样已取消，未形成完整验证报告。'; };
   button('scene').onclick = () => {
     if (!positionPassed || !screenPassed || !document.fullscreenElement || task) return;
     camera.setInteractionEnabled(true);
@@ -247,8 +273,8 @@ export function mountGazeTest(parent: HTMLElement, options: { onSceneReady?: (ca
   function download(text: string, filename: string) { const url = URL.createObjectURL(new Blob([text], { type: 'text/csv;charset=utf-8' })), a = document.createElement('a'); a.href = url; a.download = filename; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); }
   button('export').onclick = () => download(measurementsCsv(validationRows), 'gaze-position-camera.csv');
   button('screen-export').onclick = () => download('\uFEFFsource,targetId,expected,state,reason,timestampMs\r\n' + screenMeasurements.map(r => ['camera', r.targetId, r.inside ? 'on-screen' : 'off-screen', r.state, r.reason, r.timestampMs].join(',')).join('\r\n'), 'gaze-screen-camera.csv');
-  const resize = () => { cancelTask(); resetCalibration(); mode.textContent = '显示区域变化，请重新校准'; controls(); };
-  const visibility = () => { if (document.hidden && task) { cancelTask(); rows = []; allFeatures = []; screenRows = []; status.textContent = '页面切到后台，本轮采样已取消。'; } };
+  const resize = () => { guided = false; cancelTask(); resetCalibration(); mode.textContent = '显示区域变化，请重新校准'; controls(); };
+  const visibility = () => { if (document.hidden && task) pausePoint('采样已暂停。回到页面后重试当前点，已完成的采样保留。'); };
   window.addEventListener('resize', resize); document.addEventListener('fullscreenchange', resize); document.addEventListener('visibilitychange', visibility); window.addEventListener('pagehide', stopCamera);
   controls();
   return () => { disposed = true; startOperation++; cancelTask(); offEvents(); camera.dispose(); void audio?.close(); window.removeEventListener('resize', resize); document.removeEventListener('fullscreenchange', resize); document.removeEventListener('visibilitychange', visibility); window.removeEventListener('pagehide', stopCamera); root.remove(); };

@@ -1,0 +1,22 @@
+{
+  "input": "Synthetic camera/Worker; not human accuracy or real inference performance",
+  "checks": [
+    "47-step guided calibration and unchanged independent accuracy gates at reduced synthetic cadence",
+    "background resumes current point without losing completed targets",
+    "invalid independent validation blocks entry; retrying only validation restores readiness",
+    "actual forest entry, gaze walking, pause/resume, finish, local save and JSON download",
+    "second trip reuses session calibration, saves once, and home releases camera"
+  ],
+  "errors": [],
+  "calibration": {
+    "position": "独立五点验证：55/55 有效（100.0%）\n中位误差 0.0% · P90 0.0% 对角线\n本次数值达到位置门槛，仍待多人验收。",
+    "screen": "独立屏幕状态验证 180 计划样本\n离屏误报屏内 0.0% · 屏内误报离屏 0.0%\n离屏召回 100.0% · 屏内召回 100.0% · 无法判断 0.0%\n本次达到交互启用条件，仍待多人验收。\nedge11 正确 100.0% / 未知 0.0%\naway0 正确 100.0% / 未知 0.0%\naway3 正确 100.0% / 未知 0.0%\naway1 正确 100.0% / 未知 0.0%\nedge10 正确 100.0% / 未知 0.0%\ncenter 正确 100.0% / 未知 0.0%\naway4 正确 100.0% / 未知 0.0%\nedge01 正确 100.0% / 未知 0.0%\nedge00 正确 100.0% / 未知 0.0%\naway2 正确 100.0% / 未知 0.0%",
+    "cadence": "推理 11.8 Hz · 处理 P95 10.0 ms\n帧提交至结果 P95 12.5 ms"
+  },
+  "shortRun": {
+    "elapsedMs": 9548.70000000298,
+    "distanceM": 10.655784999999891,
+    "averageFps": 32.965652929233755,
+    "limitation": "Short synthetic-input run; not 15-minute joint inference acceptance"
+  }
+}

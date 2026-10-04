@@ -2,7 +2,7 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
 const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright-core');
 const base=process.env.HIKE_URL||'http://127.0.0.1:5177';
 (async()=>{
- const out=path.resolve('docs/acceptance/gaze-hike');fs.mkdirSync(out,{recursive:true});
+ const out=path.resolve(process.env.HIKE_CHECK_OUT||'docs/acceptance/gaze-hike');fs.mkdirSync(out,{recursive:true});
  const browser=await chromium.launch({channel:'msedge',headless:true,args:['--enable-webgpu','--ignore-gpu-blocklist']});
  try{
   const context=await browser.newContext({viewport:{width:1600,height:1000},acceptDownloads:true});const page=await context.newPage(),errors=[];

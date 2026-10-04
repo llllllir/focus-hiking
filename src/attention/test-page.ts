@@ -55,7 +55,7 @@ export function mountGazeTest(parent: HTMLElement, options: { onSceneReady?: (ca
       <button class="gaze-primary" data-action="guided" disabled>轻松校准并准备徒步</button><button data-action="calibrate" disabled>位置校准（15项）</button><button data-action="validate" disabled>五点验证</button><button data-action="stop" disabled>停止</button></div>
       <div class="gaze-control-row"><button data-action="screen-calibrate" disabled>屏幕内外校准</button><button data-action="screen-validate" disabled>屏幕状态验证</button>
       <button data-action="drift" disabled>中央复查</button><button data-action="scene" disabled>${options.onSceneReady ? '进入森林交互' : '启用三目标交互'}</button></div>
-      <small class="gaze-entry-note">轻松进入模式：位置15项 + 屏幕内外10项。允许较大误差，验证仅用于游戏准备，不代表精度验收。</small>
+      <small class="gaze-entry-note">位置15项 + 屏幕内外10项。验证未达标或尚未验证也可进入；结果照实保留，方向和离屏判断可能不准。</small>
       <div class="gaze-control-row gaze-secondary"><label>推理 <select data-setting="delegate"><option value="CPU">CPU / WASM</option><option value="GPU">GPU</option></select></label>
       <label>视频 <select data-setting="resolution"><option value="640">640×480</option><option value="1280">1280×720</option></select></label>
       <button data-action="export" disabled>下载验证 CSV</button><button data-action="screen-export" disabled>下载屏幕状态 CSV</button><span class="gaze-mode">camera · 未校准</span></div></section>
@@ -98,7 +98,8 @@ export function mountGazeTest(parent: HTMLElement, options: { onSceneReady?: (ca
     button('screen-calibrate').disabled = !started || !mapping || !!task || !document.fullscreenElement;
     button('screen-validate').disabled = !started || !screenCalibrated || !!task || !document.fullscreenElement;
     button('drift').disabled = !started || !mapping || !!task;
-    button('scene').disabled = !started || !positionPassed || !screenPassed || !!task || !document.fullscreenElement;
+    button('scene').disabled = !started || !mapping || !screenCalibrated || !!task || !document.fullscreenElement;
+    button('scene').textContent = positionPassed && screenPassed ? (options.onSceneReady ? '进入徒步' : '启用三目标交互') : (options.onSceneReady ? '未达标或未验证，仍进入徒步' : '未达标或未验证，仍启用交互');
     button('scene').classList.toggle('gaze-primary', !button('scene').disabled);
     button('export').disabled = !validationRows.length || !!task;
     button('screen-export').disabled = !screenMeasurements.length || !!task;
@@ -205,7 +206,7 @@ export function mountGazeTest(parent: HTMLElement, options: { onSceneReady?: (ca
         status.textContent = `屏幕内外校准完成。请执行独立屏幕状态验证；校准分组区分率 ${percent(model.balancedAccuracy)} 不是验收准确率。`;
       } else if (completed === 'screen-validation') {
         const summary = screenSummary(screenMeasurements); screenPassed = summary.passed; camera.verifyScreen(screenPassed);
-        get('.gaze-screen-report').textContent = `独立屏幕状态验证 ${screenMeasurements.length} 计划样本\n离屏误报屏内 ${percent(summary.falseOn)} · 屏内误报离屏 ${percent(summary.falseOff)}\n离屏召回 ${percent(summary.offRecall)} · 屏内召回 ${percent(summary.onRecall)} · 无法判断 ${percent(summary.unknown)}\n${screenPassed ? '本次达到交互启用条件，仍待多人验收。' : '本次未达到交互启用条件，请检查校准质量。'}`;
+        get('.gaze-screen-report').textContent = `独立屏幕状态验证 ${screenMeasurements.length} 计划样本\n离屏误报屏内 ${percent(summary.falseOn)} · 屏内误报离屏 ${percent(summary.falseOff)}\n离屏召回 ${percent(summary.offRecall)} · 屏内召回 ${percent(summary.onRecall)} · 无法判断 ${percent(summary.unknown)}\n${screenPassed ? '本次达到交互启用条件，仍待多人验收。' : '本次未达到验证门槛，仍可进入游戏，也可重新校准。'}`;
         get('.gaze-screen-report').textContent += '\n' + [...new Set(screenMeasurements.map(r => r.targetId))].map(id => {
           const group = screenMeasurements.filter(r => r.targetId === id);
           return `${id} 正确 ${percent(group.filter(r => r.state === (r.inside ? 'on-screen' : 'off-screen')).length / group.length)} / 未知 ${percent(group.filter(r => r.state === 'unknown').length / group.length)}`;
@@ -216,26 +217,26 @@ export function mountGazeTest(parent: HTMLElement, options: { onSceneReady?: (ca
         const passed = positionEntryPassed(summary);
         if (completed === 'validation') { positionPassed = passed; camera.verifyPosition(passed); }
         else if (!passed) { positionPassed = false; camera.verifyPosition(false); }
-        get('.gaze-report').textContent = `${completed === 'drift' ? '中央复查' : '独立五点验证'}：${summary.valid}/${summary.total} 有效（${percent(summary.validRate)}）\n中位误差 ${percent(summary.median)} · P90 ${percent(summary.p90)} 对角线\n轻松进入门槛：有效≥70%，中位≤15%，P90≤25%\n${passed ? '达到位置门槛，可继续准备游戏；不代表原精度验收通过。' : '本次未达门槛，请调整光照或坐姿后重试。'}`;
+        get('.gaze-report').textContent = `${completed === 'drift' ? '中央复查' : '独立五点验证'}：${summary.valid}/${summary.total} 有效（${percent(summary.validRate)}）\n中位误差 ${percent(summary.median)} · P90 ${percent(summary.p90)} 对角线\n轻松验证门槛：有效≥${percent(entryPolicy.position.validRate)}，中位≤${percent(entryPolicy.position.median)}，P90≤${percent(entryPolicy.position.p90)}\n${passed ? '达到位置门槛，可继续准备游戏；不代表原精度验收通过。' : '本次未达门槛，仍可完成屏幕校准后进入，也可重试。'}`;
         status.textContent = completed === 'drift' ? '中央复查完成。复查不会自动训练或修改校准。' : '五点验证完成。可下载匿名测量 CSV。';
       }
     } catch (error) { guided = false; status.textContent = error instanceof Error ? error.message : String(error); }
     rows = []; allFeatures = []; screenRows = []; pointFeatures = []; get<HTMLDetailsElement>('.gaze-metrics').open = true; controls();
     if (guided) {
       if (completed === 'calibration' && mapping) beginTask('validation');
-      else if (completed === 'validation' && positionPassed) beginTask('screen-calibration');
+      else if (completed === 'validation' && mapping) beginTask('screen-calibration');
       else if (completed === 'screen-calibration' && screenCalibrated) beginTask('screen-validation');
       else {
         guided = false;
-        status.textContent = positionPassed && screenPassed ? '校准与独立验证已通过，点击“进入徒步”开始。' : '验证未通过，交互保持关闭。请查看测量结果，仅重试未通过的阶段。';
-        if (positionPassed && screenPassed) button('scene').focus();
+        status.textContent = positionPassed && screenPassed ? '校准与独立验证已通过，点击“进入徒步”开始。' : '验证未达标，仍可点击进入徒步，也可重试验证；测量结果保持不变。';
+        if (mapping && screenCalibrated) button('scene').focus();
       }
     }
   }
   function beginTask(kind: Task) {
     if (!started || (kind !== 'calibration' && !mapping) || (kind.startsWith('screen') && !document.fullscreenElement)) return;
     if (kind === 'screen-validation' && !screenCalibrated) return;
-    cancelTask(); camera.setInteractionEnabled(false); camera.setTargets([]); get('.gaze-demo-targets').hidden = true;
+    cancelTask(); camera.revokeUnverifiedEntry(); camera.setInteractionEnabled(false); camera.setTargets([]); get('.gaze-demo-targets').hidden = true;
     task = kind; pointIndex = 0; retries = 0; rows = []; allFeatures = []; screenRows = [];
     audio ??= new AudioContext(); void audio.resume().catch(() => {});
     if (kind === 'calibration') {
@@ -262,7 +263,8 @@ export function mountGazeTest(parent: HTMLElement, options: { onSceneReady?: (ca
   button('screen-calibrate').onclick = () => beginTask('screen-calibration'); button('screen-validate').onclick = () => beginTask('screen-validation'); button('drift').onclick = () => beginTask('drift');
   button('cancel').onclick = () => { guided = false; cancelTask(); rows = []; allFeatures = []; screenRows = []; status.textContent = '本轮采样已取消，未形成完整验证报告。'; };
   button('scene').onclick = () => {
-    if (!positionPassed || !screenPassed || !document.fullscreenElement || task) return;
+    if (!started || !mapping || !screenCalibrated || !document.fullscreenElement || task) return;
+    if ((!positionPassed || !screenPassed) && !camera.allowUnverifiedEntry()) return;
     camera.setInteractionEnabled(true);
     if (options.onSceneReady) { options.onSceneReady(camera); return; }
     const container = get('.gaze-demo-targets'); container.hidden = false;

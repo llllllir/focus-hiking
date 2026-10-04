@@ -46,7 +46,15 @@ export class CameraAttention implements AttentionPort {
   subscribeEvents(fn: (event: GazeEvent) => void) { this.eventListeners.add(fn); return () => { this.eventListeners.delete(fn); }; }
   setTargets(targets: TargetRegion[]) { this.tracker.setTargets(targets.filter(t => t.width > 0 && t.height > 0 && [t.x, t.y, t.width, t.height].every(Number.isFinite))); }
   get running() { return this.stream !== null && this.worker !== null; }
-  get interactionReady() { return this.running && this.pipeline.positionVerified && this.pipeline.screenVerified && !!document.fullscreenElement; }
+  get interactionReady() { return this.running && this.pipeline.entryReady && !!document.fullscreenElement; }
+  get unverifiedEntry() { return this.pipeline.unverifiedEntry; }
+  allowUnverifiedEntry() {
+    if (!this.running || !document.fullscreenElement || !this.pipeline.mapping || !this.pipeline.screenModel) return false;
+    this.pipeline.unverifiedEntry = true;
+    this.invalidate('screen-settling');
+    return true;
+  }
+  revokeUnverifiedEntry() { this.pipeline.unverifiedEntry = false; this.invalidate('interaction-paused'); }
   drawEyePreview(canvas: HTMLCanvasElement, features: EyeFeatures | null) {
     const context = canvas.getContext('2d'); if (!context) return;
     context.clearRect(0, 0, canvas.width, canvas.height);
@@ -62,9 +70,9 @@ export class CameraAttention implements AttentionPort {
   subscribeUpdates(fn: (update: CameraUpdate) => void) { this.updateListeners.add(fn); return () => { this.updateListeners.delete(fn); }; }
   subscribeScreenStatus(fn: (status: ScreenStatus) => void) { this.statusListeners.add(fn); return () => { this.statusListeners.delete(fn); }; }
   setMapping(mapping: Mapping | null) { this.pipeline.clear(); this.pipeline.mapping = mapping; this.invalidate('not-calibrated'); }
-  setScreenMapping(model: ScreenModel | null) { this.pipeline.screenModel = model; this.pipeline.screenVerified = false; this.invalidate('screen-unverified'); }
-  verifyPosition(passed: boolean) { this.pipeline.positionVerified = passed; if (!passed) this.invalidate('position-unverified'); }
-  verifyScreen(passed: boolean) { this.pipeline.screenVerified = passed; if (!passed) this.invalidate('screen-unverified'); }
+  setScreenMapping(model: ScreenModel | null) { this.pipeline.unverifiedEntry = false; this.pipeline.screenModel = model; this.pipeline.screenVerified = false; this.invalidate('screen-unverified'); }
+  verifyPosition(passed: boolean) { this.pipeline.unverifiedEntry = false; this.pipeline.positionVerified = passed; if (!passed) this.invalidate('position-unverified'); }
+  verifyScreen(passed: boolean) { this.pipeline.unverifiedEntry = false; this.pipeline.screenVerified = passed; if (!passed) this.invalidate('screen-unverified'); }
   setInteractionEnabled(enabled: boolean) { this.pipeline.interactionEnabled = enabled; this.invalidate(enabled ? 'screen-settling' : 'interaction-paused'); }
   clearCalibration() { this.pipeline.clear(); this.invalidate('not-calibrated'); }
   private publish(update: CameraUpdate) {

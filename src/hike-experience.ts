@@ -25,6 +25,7 @@ export function mountHikeExperience(parent:HTMLElement) {
         const game=mountHikeGame(scene,camera,{minutes,archive,isReady:()=>camera.interactionReady,onExit:home,onRecalibrate:()=>{
           gameDispose?.();gameDispose=null;camera.setInteractionEnabled(false);scene.hidden=true;calibration.hidden=false;
         }});
+        if(camera.unverifiedEntry){const note=document.createElement('p');note.className='gaze-unverified-notice';note.textContent='体验模式 · 验证未达标或未验证，方向与离屏判断可能不准。';scene.append(note);}
         gameDispose=()=>game.dispose();camera.setInteractionEnabled(true);
       }catch(error){scene.hidden=true;calibration.hidden=false;const status=calibration.querySelector('.gaze-status');if(status)status.textContent=error instanceof Error?error.message:'暂时无法进入森林，请重试';}
       finally{entering=false;}

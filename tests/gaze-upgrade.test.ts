@@ -72,13 +72,35 @@ test('unknown, time gaps and clock reversal break screen-state dwell', () => {
   assert.equal(s.update(away, 900).state, 'unknown');
   assert.equal(s.update(away, 850).state, 'unknown');
 });
-test('unverified calibration never emits interactive camera samples', () => {
+test('unverified calibration without explicit entry consent never emits interactive samples', () => {
   const p = pipeline(); p.positionVerified = false;
   let r = p.process({ valid: true, features: features(.5, .5) }, 0, true);
   for (let t = 100; t <= 500; t += 100) r = p.process({ valid: true, features: features(.5, .5) }, t, true);
   assert.equal(r.screen.state, 'on-screen'); assert.equal(r.sample.valid, false); assert.ok(r.position);
   p.positionVerified = true; p.screenVerified = false;
   assert.equal(p.process({ valid: true, features: features(.5, .5) }, 600, true).sample.valid, false);
+});
+test('phase8 opt-in preserves failed validation while allowing calibrated live interaction', () => {
+  const p = pipeline(); p.positionVerified = false; p.screenVerified = false;
+  assert.equal(p.entryReady, false);
+  p.unverifiedEntry = true;
+  assert.equal(p.entryReady, true);
+  let r = p.process({ valid: true, features: features(.5, .5) }, 0, true);
+  for (let t = 100; t <= 500; t += 100) r = p.process({ valid: true, features: features(.5, .5) }, t, true);
+  assert.equal(r.sample.valid, true);
+  assert.equal(p.positionVerified, false); assert.equal(p.screenVerified, false);
+  for (const reason of ['eyes-unavailable', 'no-face', 'stale-frame', 'background']) {
+    assert.equal(p.process({ valid: false, reason }, 600, true).sample.valid, false);
+  }
+  for (let t = 700; t <= 1400; t += 100) assert.equal(p.process({ valid: true, features: features(1.55, .5) }, t, true).sample.valid, false);
+  assert.equal(p.process({ valid: true, features: features(.5, .5) }, 1500, false).sample.valid, false);
+  p.clear(); assert.equal(p.unverifiedEntry, false); assert.equal(p.entryReady, false);
+});
+test('phase8 consent cannot replace missing models or enable paused interaction', () => {
+  const p = pipeline(); p.unverifiedEntry = true; p.interactionEnabled = false;
+  for (let t = 0; t < 1000; t += 100) assert.equal(p.process({ valid: true, features: features(.5, .5) }, t, true).sample.valid, false);
+  p.screenModel = null; assert.equal(p.entryReady, false);
+  p.screenModel = classifier; p.mapping = null; assert.equal(p.entryReady, false);
 });
 test('camera decisions drive one scene confirmation; blink, offscreen and pause never confirm', () => {
   const p = pipeline(), dwell = new DwellTracker();

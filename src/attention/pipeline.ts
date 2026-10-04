@@ -23,11 +23,13 @@ export class GazePipeline {
   screenModel: ScreenModel | null = null;
   positionVerified = false;
   screenVerified = false;
+  unverifiedEntry = false;
+  get entryReady() { return !!this.mapping && !!this.screenModel && ((this.positionVerified && this.screenVerified) || this.unverifiedEntry); }
   interactionEnabled = false;
   private smoother = new OneEuroSmoother();
   private screenFilter = new ScreenStabilizer();
   reset() { this.smoother.reset(); this.screenFilter.reset(); }
-  clear() { this.mapping = null; this.screenModel = null; this.positionVerified = false; this.screenVerified = false; this.interactionEnabled = false; this.reset(); }
+  clear() { this.mapping = null; this.screenModel = null; this.positionVerified = false; this.screenVerified = false; this.unverifiedEntry = false; this.interactionEnabled = false; this.reset(); }
   process(result: FeatureResult, timestampMs: number, fullscreen: boolean): GazeResult {
     const f = result.valid ? result.features : null;
     let reason = result.valid ? (this.mapping ? qualityReason(result.features, this.mapping.baseline) : 'not-calibrated') : result.reason;
@@ -45,7 +47,7 @@ export class GazePipeline {
     } else this.smoother.reset();
     const screen = this.screenFilter.update(evidence, timestampMs);
     const inside = position && position.x >= 0 && position.x <= 1 && position.y >= 0 && position.y <= 1;
-    const valid = !!inside && screen.state === 'on-screen' && this.positionVerified && this.screenVerified && this.interactionEnabled;
+    const valid = !!inside && screen.state === 'on-screen' && this.entryReady && this.interactionEnabled;
     if (!valid && screen.state === 'on-screen') reason = !this.positionVerified ? 'position-unverified' : !this.screenVerified ? 'screen-unverified' : !this.interactionEnabled ? 'interaction-paused' : 'screen-uncertain';
     else if (!valid) reason = screen.reason;
     return { features: f, raw, position, sensorValid, screen,

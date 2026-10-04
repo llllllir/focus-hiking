@@ -1,11 +1,11 @@
 /** User-authorized easy-entry policy, 2026-10-04. Not the original M2 acceptance criteria. */
 export const entryPolicy = {
-  id: 'easy-entry-v1',
+  id: 'easy-entry-v2-phase8',
   stableSamples: 8,
   retainedFraction: .5,
-  position: { validRate: .7, median: .15, p90: .25 },
-  screen: { falseOn: .2, falseOff: .2, recall: .7, unknown: .3 },
-  classifier: { onScore: .55, offScore: .45, foldRecall: .5, balancedAccuracy: .65, marginCap: .05 },
+  position: { validRate: .5, median: .25, p90: .4 },
+  screen: { falseOn: .35, falseOff: .35, recall: .5, unknown: .5 },
+  classifier: { onScore: .52, offScore: .48, foldRecall: .4, balancedAccuracy: .55, marginCap: .05 },
 } as const;
 
 export function positionEntryPassed(summary: { validRate: number; median: number | null; p90: number | null }) {

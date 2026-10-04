@@ -15,7 +15,7 @@ export interface GameOptions {
 export function mountGame(app: HTMLElement, attention?: AttentionPort, options: GameOptions = {}) {
   app.innerHTML = `
     <div class="scene-host" aria-label="森林登山三维场景"></div>
-    <header class="topbar"><a class="brand" href="/">FOCUS <span>HIKING</span></a><span class="version">场景2.0 · 山林探索 / 画质未验收</span></header>
+    <header class="topbar"><a class="brand" href="/">此刻山间 <span>· Here in the Mountains</span></a><span class="version">场景2.0 · 山林探索 / 画质未验收</span></header>
     <section class="intro"><p class="eyebrow">FOREST WALK · 林间漫步</p><h1>走进林间，<br>留一点时间给自己。</h1><p class="intro-copy">穿过溪谷、白桦林与山坡。<br>自由漫步，或规划一段登顶路线。</p><button class="primary" id="start" disabled>正在准备森林…</button><p class="hint">自由探索 · 路线规划 · 可随时暂停</p></section>
     <aside class="explore" hidden><h2>林地探索</h2><p>拖动画面转头 · WASD 行走<br>同一片山林，选择自己的走法</p><button id="mode">路线规划</button><button id="center">视角归正</button><svg id="explorer-map" viewBox="-195 -255 390 381" role="img" aria-label="探索地图：三条连通小径与当前位置" style="width:100%;height:180px;background:#24332b;border:1px solid #ffffff35"></svg><div class="destinations" hidden><button data-destination="camp">营地</button><button data-destination="trail">苔岩环线</button><button data-destination="creek">溪谷木桥</button><button data-destination="ridge">山顶俯瞰</button></div><button id="depart" hidden disabled>确认路线并出发</button><p id="navigation-status" aria-live="polite">自由探索 · 地图显示当前位置</p><small>真实眼动尚未接入；当前目的地用鼠标选择。</small></aside>
     <aside class="error" role="alert" hidden><h2>暂时无法进入森林</h2><p></p><button id="retry">重新加载</button></aside>

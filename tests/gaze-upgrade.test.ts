@@ -102,6 +102,17 @@ test('phase8 consent cannot replace missing models or enable paused interaction'
   p.screenModel = null; assert.equal(p.entryReady, false);
   p.screenModel = classifier; p.mapping = null; assert.equal(p.entryReady, false);
 });
+test('three-attempt basic mode uses live eye geometry without fabricating verified models', () => {
+  const p = new GazePipeline(); p.basicEntry = true; p.unverifiedEntry = true; p.interactionEnabled = true;
+  let r = p.process({ valid: true, features: features(.5, .5) }, 0, true);
+  for (let t = 100; t <= 600; t += 100) r = p.process({ valid: true, features: features(.5, .5) }, t, true);
+  assert.equal(r.sample.valid, true); assert.equal(r.sample.source, 'camera'); assert.equal(p.positionVerified, false); assert.equal(p.screenVerified, false); assert.equal(p.mapping, null);
+  const closed = features(.5, .5); closed.left.openness = .03;
+  assert.equal(p.process({ valid: true, features: closed }, 700, true).sample.valid, false);
+  assert.equal(p.process({ valid: false, reason: 'no-face' }, 800, true).sample.valid, false);
+  assert.equal(p.process({ valid: true, features: features(.5, .5) }, 900, false).sample.valid, false);
+  p.clear(); assert.equal(p.basicEntry, false); assert.equal(p.entryReady, false);
+});
 test('camera decisions drive one scene confirmation; blink, offscreen and pause never confirm', () => {
   const p = pipeline(), dwell = new DwellTracker();
   const target = { id: 'explore-creek', x: .3, y: .3, width: .4, height: .4, enabled: true };

@@ -42,7 +42,7 @@ const base = process.env.HIKE_URL || 'http://127.0.0.1:5177';
     await page.locator('[data-action="scene"]').click();
     await page.locator('#hike-begin').waitFor();
     assert.equal(await page.locator('#hike-begin').isDisabled(), true);
-    assert.match(await page.locator('.gaze-unverified-notice').innerText(), /未达标或未验证/);
+    assert.match(await page.locator('.gaze-unverified-notice').innerText(), /尚未通过精度验证/);
     await page.evaluate(() => { window.__fixture.invalid = false; });
     await page.waitForFunction(() => document.querySelector('#hike-begin')?.disabled === false, null, { timeout: 90000 });
     await page.locator('#hike-begin').click(); await page.waitForTimeout(8000);

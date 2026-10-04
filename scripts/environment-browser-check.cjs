@@ -1,0 +1,63 @@
+const fs = require('node:fs'), path = require('node:path'), assert = require('node:assert/strict');
+const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright-core');
+const { media, fixture, finishTask } = require('./gaze-upgrade-browser-check.cjs');
+const base = process.env.HIKE_URL || 'http://127.0.0.1:5188';
+const key = 'here-in-the-mountains.environments.v1';
+(async () => {
+  const out = path.resolve('docs/acceptance/environment-archives'); fs.mkdirSync(out, { recursive: true });
+  const browser = await chromium.launch({ channel: 'msedge', headless: true, args: ['--enable-webgpu', '--ignore-gpu-blocklist'] });
+  const report = { input: 'Synthetic Canvas and Worker only; not human gaze accuracy', checks: [], errors: [] };
+  const context = async () => { const ctx = await browser.newContext({ viewport: { width: 1440, height: 1000 } }); await ctx.addInitScript(media); await ctx.addInitScript(() => { const getMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices); navigator.mediaDevices.getUserMedia = async constraints => { const stream = await getMedia(constraints); for (const track of stream.getVideoTracks()) { const settings = track.getSettings.bind(track); track.getSettings = () => ({ ...settings(), deviceId: 'synthetic-environment-camera' }); } return stream; }; }); await ctx.addInitScript(fixture); return ctx; };
+  const start = async page => { await page.locator('#hike-setup').click(); await page.locator('[data-action="fullscreen"]').click(); await page.locator('[data-action="start"]').click(); await page.waitForFunction(() => !document.querySelector('[data-action="guided"]').disabled); };
+  const counts = page => page.evaluate(key => JSON.parse(localStorage.getItem(key)).profiles[0].attempts, key);
+  try {
+    const ctx = await context(), page = await ctx.newPage(); page.on('pageerror', e => report.errors.push(e.message));
+    await page.goto(base); assert.match(await page.title(), /此刻山间/); assert.match(await page.locator('h1').innerText(), /目光慢下来/);
+    assert.equal(await page.locator('.environment-enter').isDisabled(), true);
+    await page.screenshot({ path: path.join(out, 'home-synthetic.png') });
+    await start(page); await page.locator('[data-action="guided"]').click(); await finishTask(page, 180000);
+    assert.equal(await page.locator('[data-action="save-environment"]').isDisabled(), false, await page.locator('.gaze-status').innerText());
+    assert.equal(await counts(page), 1); await page.locator('[data-action="save-environment"]').click();
+    assert.match(await page.locator('.gaze-status').innerText(), /已保存在本机/);
+    const saved = await page.evaluate(key => localStorage.getItem(key), key); assert.ok(!saved.includes('preview'));
+    report.checks.push('guided successful validation counts once and explicitly saves fitted parameters without frames/previews');
+    console.log('Saved successful synthetic environment');
+    await page.reload(); await page.locator('.environment-enter').click();
+    await page.waitForFunction(() => document.querySelector('#hike-begin')?.disabled === false, null, { timeout: 90000 });
+    assert.equal(await page.locator('.gaze-overlay').count(), 0); assert.match(await page.locator('.gaze-unverified-notice').innerText(), /成功环境存档/);
+    await page.locator('#hike-begin').click(); await page.waitForTimeout(2200); assert.match(await page.locator('#hike-state').innerText(), /正在行走/);
+    await page.screenshot({ path: path.join(out, 'saved-entry-synthetic.png') });
+    report.checks.push('reload -> click saved environment -> camera permission/start -> actual forest walking, without calibration UI');
+    await page.locator('#hike-stop').click(); await page.locator('.hike-result .hike-exit').click();
+    await page.evaluate(key => { const data = JSON.parse(localStorage.getItem(key)); data.profiles[0].signature.width += 1; localStorage.setItem(key, JSON.stringify(data)); }, key);
+    await page.reload(); await page.locator('.environment-enter').click();
+    await page.waitForFunction(() => document.querySelector('.gaze-status')?.textContent.includes('环境与存档不同'));
+    assert.equal(await page.locator('#hike-begin').count(), 0); assert.ok(await page.evaluate(() => window.__mediaStops > 0));
+    report.checks.push('changed viewport rejects reuse and closes camera without pretending validation passed');
+    await page.locator('.hike-setup-back').click(); await page.locator('.environment-delete').click(); assert.equal(await page.locator('.environment-card').count(), 0);
+    await page.reload(); assert.equal(await page.locator('.environment-enter').isDisabled(), true);
+    report.checks.push('delete removes saved environment; fresh default profile cannot skip tests');
+    await ctx.close();
+    const failed = await context(), fp = await failed.newPage(); fp.on('pageerror', e => report.errors.push(e.message)); await fp.goto(base); await start(fp);
+    await fp.locator('[data-action="calibrate"]').click(); await fp.locator('[data-action="cancel"]').click(); assert.equal(await counts(fp), 0);
+    await fp.evaluate(() => { window.__fixture.invalid = true; });
+    for (let i = 1; i <= 3; i++) {
+      await fp.locator('[data-action="calibrate"]').click();
+      await fp.waitForFunction(() => document.querySelector('.gaze-task-instruction').textContent.includes('之前的进度已保留'), null, { timeout: 15000 });
+      assert.equal(await counts(fp), i); assert.equal(await fp.locator('[data-action="retry-entry-overlay"]').isVisible(), i === 3);
+      if (i < 3) await fp.locator('[data-action="cancel"]').click();
+    }
+    console.log('Three real synthetic failed attempts counted; automatic retries were not counted separately');
+    await fp.locator('[data-action="retry-entry-overlay"]').click(); await fp.locator('#hike-begin').waitFor(); assert.equal(await fp.locator('#hike-begin').isDisabled(), true);
+    await fp.evaluate(() => { window.__fixture.invalid = false; }); await fp.waitForFunction(() => document.querySelector('#hike-begin')?.disabled === false, null, { timeout: 90000 });
+    await fp.locator('#hike-begin').click(); await fp.waitForTimeout(1800); assert.match(await fp.locator('#hike-state').innerText(), /正在行走/);
+    await fp.screenshot({ path: path.join(out, 'three-attempt-entry-synthetic.png') });
+    report.checks.push('cancel counts zero; three failed sampling rounds unlock direct entry even without fitted models; invalid live signals still block movement');
+    await fp.locator('#hike-stop').click(); await fp.locator('.hike-result .hike-exit').click(); await fp.reload();
+    assert.match(await fp.locator('.environment-enter').innerText(), /不再测试/); await fp.locator('.environment-enter').click();
+    await fp.waitForFunction(() => document.querySelector('#hike-begin')?.disabled === false, null, { timeout: 90000 }); assert.equal(await fp.locator('.gaze-overlay').count(), 0);
+    report.checks.push('three-attempt environment remains unlocked after reload, without another test');
+    await fp.evaluate(() => { localStorage.clear(); }); await failed.close();
+    assert.deepEqual(report.errors, []); fs.writeFileSync(path.join(out, 'checks.json'), JSON.stringify(report, null, 2)); console.log(JSON.stringify(report, null, 2));
+  } finally { await browser.close(); }
+})().catch(error => { console.error(error); process.exitCode = 1; });

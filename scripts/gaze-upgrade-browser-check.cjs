@@ -38,7 +38,7 @@ function fixture() {
         vector: [left.x, left.y, left.x, left.y, .25, .25, yaw, pitch, 0, .5, .5, .4] };
       const missedScreenTarget = sampling && overlay.dataset.task === 'screen-validation' && state.missingScreenTargets?.includes(target.dataset.targetId);
       const result = state.invalid || missedScreenTarget ? { valid: false, reason: 'eyes-unavailable' } : { valid: true, features };
-      setTimeout(() => { if (this.active) this.onmessage?.({ data: state.fatal ? { type: 'error', message: 'synthetic failure' } : { type: 'result', result, timestampMs: message.timestampMs - (state.stale ? 1000 : 0), processingMs: 10 } }); }, 10);
+      setTimeout(() => { if (this.active) this.onmessage?.({ data: state.fatal ? { type: 'error', message: 'synthetic failure' } : { type: 'result', result, timestampMs: message.timestampMs - (state.stale ? 1000 : 0), processingMs: state.processingDelay || 10 } }); }, state.processingDelay || 10);
     }
     terminate() { this.active = false; }
   };

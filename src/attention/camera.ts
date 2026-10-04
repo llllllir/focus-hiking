@@ -6,6 +6,7 @@ import type { Mapping, GazeResult } from './pipeline';
 import type { ScreenModel, ScreenStatus } from './screen';
 export type { Mapping } from './pipeline';
 import type { WorkerRequest, WorkerResponse } from './protocol';
+import { gazeFreshMs } from './sample-timing';
 import { calibrationVersion, cleanSnapshot, sameEnvironment } from './environment';
 import type { CalibrationSnapshot, EnvironmentSignature } from './environment';
 
@@ -38,7 +39,14 @@ export class CameraAttention implements AttentionPort {
     if (document.hidden) this.invalidate('background');
     else { this.pipeline.reset(); this.tracker.reset(); this.lastVideoTime = -1; this.lastResultMs = performance.now(); }
   };
-  private viewportChange = () => { this.clearCalibration(); this.onStatus('显示区域变化，已清除校准，请重新校准'); };
+  private viewportKey = this.displayKey();
+  private displayKey() { return `${innerWidth}:${innerHeight}:${devicePixelRatio}:${screen.width}:${screen.height}:${!!document.fullscreenElement}`; }
+  private viewportChange = () => {
+    const next = this.displayKey();
+    if (next === this.viewportKey) return;
+    this.viewportKey = next;
+    this.clearCalibration(); this.onStatus('显示区域变化，已清除校准，请重新校准');
+  };
   constructor(private onUpdate: (update: CameraUpdate) => void = () => {}, private onStatus: (status: string) => void = () => {}) {
     this.video.muted = true; this.video.playsInline = true;
     document.addEventListener('visibilitychange', this.visibility);
@@ -150,7 +158,7 @@ export class CameraAttention implements AttentionPort {
       this.onStatus(`摄像头已开启 · ${settings.width}×${settings.height} · ${Math.round(settings.frameRate ?? 0)} FPS · ${delegate}`);
       this.timer = setInterval(() => {
         if (document.hidden) return;
-        if (performance.now() - this.lastResultMs > 500) this.invalidate('stale-frame');
+        if (performance.now() - this.lastResultMs > gazeFreshMs) this.invalidate('stale-frame');
         if (this.busy && performance.now() - this.sentAt > 10000) { this.stop(); this.onStatus('推理超时，请重新开启摄像头'); return; }
         void this.capture(generation);
       }, 1000 / 15);
@@ -176,7 +184,7 @@ export class CameraAttention implements AttentionPort {
   }
   private process(result: FeatureResult, timestampMs: number, processingMs: number, pipelineMs: number) {
     if (document.hidden) { this.invalidate('background'); return; }
-    if (performance.now() - timestampMs > 500) { this.invalidate('stale-frame', timestampMs, null, processingMs, pipelineMs); return; }
+    if (performance.now() - timestampMs > gazeFreshMs) { this.invalidate('stale-frame', timestampMs, null, processingMs, pipelineMs); return; }
     this.publish({ ...this.pipeline.process(result, timestampMs, !!document.fullscreenElement), processingMs, pipelineMs });
   }
   stop() {

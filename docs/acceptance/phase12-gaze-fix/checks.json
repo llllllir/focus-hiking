@@ -1,0 +1,12 @@
+{
+  "input": "Injected synthetic Canvas and Worker through real CameraAttention; not human gaze accuracy",
+  "checks": [
+    "actual CameraAttention with failed retained models -> basic mode -> forest movement and right turn",
+    "no-op resize/fullscreen notifications do not destroy the active calibration or basic mode",
+    "opted-in calibrated mode also walks despite the failed screen classifier, without marking validation passed",
+    "300ms processing delay still yields accepted samples and actual forest movement",
+    "invalid eyes stop immediately with a specific hint; valid input resumes without a second entry test",
+    "one-second stale capture remains unusable for movement"
+  ],
+  "errors": []
+}

@@ -5,6 +5,26 @@ import { HikeSession } from '../training/hike-session';
 import type { HikeRecord } from '../training/hike-session';
 import { HikeArchive, hikeProgress } from '../training/hike-archive';
 import './hike.css';
+import { gazeFreshMs } from '../attention/sample-timing';
+
+const gazeIssue: Record<string,string> = {
+  'fullscreen-required':'已退出全屏 · 请重新校准',
+  'not-calibrated':'校准已失效 · 请重新校准',
+  'position-unverified':'位置验证尚未解锁 · 请返回选择免测体验',
+  'screen-unverified':'屏幕验证尚未解锁 · 请返回选择免测体验',
+  'screen-not-calibrated':'缺少屏幕映射 · 请重新校准',
+  'screen-uncertain':'眼部已识别 · 屏幕内外尚不能确定',
+  'screen-settling':'眼部已识别 · 正在稳定视线',
+  'calibration-range':'坐姿超出校准范围 · 请回到原坐姿',
+  'eyes-unavailable':'眼部暂不可见 · 请睁眼并调整光照',
+  'eyes-disagree':'双眼估计不一致 · 请调整光照或眼镜反光',
+  'no-face':'未识别人脸 · 请检查摄像头位置',
+  'pose-out-of-range':'头部偏转过大 · 请面向屏幕',
+  'face-too-small':'距离摄像头过远 · 请稍靠近',
+  'stale-frame':'眼动处理延迟 · 等待新画面',
+  'interaction-paused':'眼动交互未启用 · 请重新进入',
+  'stopped':'摄像头已停止 · 请重新开启',
+};
 
 export const formatTime = (ms: number) => { const s=Math.max(0,Math.floor(ms/1000));return `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`; };
 const percent = (value:number|null)=>value===null?'—':`${Math.round(value*100)}%`;
@@ -87,7 +107,8 @@ export function mountHikeGame(parent:HTMLElement,attention:AttentionPort,options
     const state=session.gazeState(now),paused=session.phase==='paused';
     setText(get('#hike-clock'),`${formatTime(session.elapsedMs)} / ${session.plannedMinutes}:00`);
     get<HTMLProgressElement>('#hike-progress').value=session.elapsedMs/(session.plannedMinutes*60000);
-    setText(get('#hike-state'),paused?'已暂停 · 点击继续':state==='on-screen'?'目光在森林 · 正在行走':state==='off-screen'?session.isStorm(now)?'视线离屏 · 停步，等待你回来':'视线离屏 · 停步':latest?.invalidReason==='fullscreen-required'?'已退出全屏 · 请重新校准':'视线暂不清晰 · 停步');
+    const issue = !latest || now-latest.timestampMs>gazeFreshMs ? '等待新的摄像头眼动信号 · 停步' : gazeIssue[latest.invalidReason??'']??'暂无法判断视线 · 停步';
+    setText(get('#hike-state'),paused?`已暂停 · ${latest?.invalidReason&&gazeIssue[latest.invalidReason] ? gazeIssue[latest.invalidReason] : '点击继续'}`:state==='on-screen'?'目光在森林 · 正在行走':state==='off-screen'?session.isStorm(now)?'视线离屏 · 停步，等待你回来':'视线离屏 · 停步':issue);
     hud.dataset.state=paused?'paused':state;
     marker.hidden=!session.isWalking(now);if(!marker.hidden&&latest){marker.style.left=`${latest.x!*100}%`;marker.style.top=`${latest.y!*100}%`;}
     if(forest){forest.scene.userData.hike={phase:session.phase,state,elapsedMs:session.elapsedMs,onScreenMs:session.onScreenMs,offScreenMs:session.offScreenMs,unknownMs:session.unknownMs,departures:session.departures,weather,body:forest.position(),source:options.source??'camera',autoLevel};}

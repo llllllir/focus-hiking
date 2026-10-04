@@ -2,6 +2,7 @@ import type { EyeFeatures } from './features';
 import { coveredPose, poseCoverage } from './calibration';
 import type { PoseCoverage } from './calibration';
 import { entryPolicy } from './entry-policy';
+import { gazeFreshMs } from './sample-timing';
 
 export type ScreenState = 'on-screen' | 'off-screen' | 'unknown';
 export interface ScreenStatus { state: ScreenState; reason: string; score: number | null; timestampMs: number; source: 'camera' }
@@ -77,7 +78,7 @@ export class ScreenStabilizer {
   private last = -Infinity;
   reset() { this.candidate = 'unknown'; this.since = 0; this.last = -Infinity; }
   update(evidence: { state: ScreenState; reason: string; score: number | null }, timestampMs: number): ScreenStatus {
-    if (evidence.state === 'unknown' || timestampMs <= this.last || timestampMs - this.last > 250) this.reset();
+    if (evidence.state === 'unknown' || timestampMs <= this.last || timestampMs - this.last > gazeFreshMs) this.reset();
     if (evidence.state !== this.candidate) { this.candidate = evidence.state; this.since = timestampMs; }
     this.last = timestampMs;
     const stable = evidence.state !== 'unknown' && timestampMs - this.since >= (evidence.state === 'off-screen' ? 400 : 200);

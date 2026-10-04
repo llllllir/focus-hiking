@@ -1,0 +1,44 @@
+const fs=require('node:fs'),assert=require('node:assert/strict');
+const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright-core');
+const {media,fixture}=require('./gaze-upgrade-browser-check.cjs');
+(async()=>{
+ const browser=await chromium.launch({channel:'msedge',headless:true,args:['--enable-webgpu','--ignore-gpu-blocklist']});
+ const out='docs/acceptance/phase12-gaze-fix';fs.mkdirSync(out,{recursive:true});
+ const checks=[],errors=[];
+ try{
+  const context=await browser.newContext({viewport:{width:1440,height:1000}});await context.addInitScript(media);await context.addInitScript(fixture);
+  const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));
+  await page.goto((process.env.HIKE_URL||'http://127.0.0.1:5189')+'/tests/camera-hike-harness.html?quality=smooth');
+  await page.locator('#connect').click();
+  await page.waitForFunction(()=>window.__cameraHike?.game.session.phase==='running',null,{timeout:90000});
+  await page.waitForFunction(()=>window.__cameraHike.game.session.distanceM>.1,null,{timeout:30000});
+  const before=await page.evaluate(()=>window.__cameraHike.game.forest.camera.rotation.y);
+  await page.evaluate(()=>window.__fixture.x=.8);
+  await page.waitForFunction(start=>Math.abs(window.__cameraHike.game.forest.camera.rotation.y-start)>.04,before,{timeout:15000});
+  checks.push('actual CameraAttention with failed retained models -> basic mode -> forest movement and right turn');
+  await page.evaluate(()=>{window.dispatchEvent(new Event('resize'));document.dispatchEvent(new Event('fullscreenchange'))});
+  assert.equal(await page.evaluate(()=>window.__cameraHike.camera.interactionReady),true);
+  checks.push('no-op resize/fullscreen notifications do not destroy the active calibration or basic mode');
+  await page.evaluate(()=>{window.__fixture.x=.5;window.__cameraHike.camera.revokeUnverifiedEntry();window.__cameraHike.camera.allowUnverifiedEntry()});
+  await page.waitForFunction(()=>window.__cameraHike.game.session.isWalking(performance.now()),null,{timeout:15000});
+  checks.push('opted-in calibrated mode also walks despite the failed screen classifier, without marking validation passed');
+  await page.evaluate(()=>{window.__fixture.x=.5;window.__fixture.processingDelay=300});
+  await page.waitForFunction(()=>window.__cameraHike.updates.some(u=>u.valid&&u.age>=280),null,{timeout:15000});
+  await page.waitForFunction(()=>window.__cameraHike.game.session.isWalking(performance.now()),null,{timeout:15000});
+  const distance=await page.evaluate(()=>window.__cameraHike.game.session.distanceM);
+  await page.waitForFunction(d=>window.__cameraHike.game.session.distanceM>d+.1,distance,{timeout:15000});
+  checks.push('300ms processing delay still yields accepted samples and actual forest movement');
+  await page.screenshot({path:out+'/walking-synthetic.png'});
+  await page.evaluate(()=>{window.__fixture.invalid=true;window.__fixture.processingDelay=10});
+  await page.waitForFunction(()=>!window.__cameraHike.game.session.isWalking(performance.now())&&document.querySelector('#hike-state').textContent.includes('眼部暂不可见'));
+  const stopped=await page.evaluate(()=>window.__cameraHike.game.session.distanceM);await page.waitForTimeout(700);
+  assert.equal(await page.evaluate(()=>window.__cameraHike.game.session.distanceM),stopped);
+  await page.evaluate(()=>window.__fixture.invalid=false);await page.waitForFunction(()=>window.__cameraHike.game.session.isWalking(performance.now()));
+  checks.push('invalid eyes stop immediately with a specific hint; valid input resumes without a second entry test');
+  await page.evaluate(()=>window.__fixture.stale=true);await page.waitForFunction(()=>!window.__cameraHike.game.session.isWalking(performance.now()));
+  checks.push('one-second stale capture remains unusable for movement');
+  assert.deepEqual(errors,[]);
+  const report={input:'Injected synthetic Canvas and Worker through real CameraAttention; not human gaze accuracy',checks,errors};
+  fs.writeFileSync(out+'/checks.json',JSON.stringify(report,null,2));console.log(JSON.stringify(report));
+ }finally{await browser.close()}
+})().catch(e=>{console.error(e);process.exitCode=1});

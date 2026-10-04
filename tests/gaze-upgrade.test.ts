@@ -69,8 +69,8 @@ test('unknown, time gaps and clock reversal break screen-state dwell', () => {
   assert.equal(s.update(away, 400).state, 'off-screen');
   assert.equal(s.update({ state: 'unknown', reason: 'eyes-unavailable', score: null }, 450).state, 'unknown');
   assert.equal(s.update(away, 500).state, 'unknown');
-  assert.equal(s.update(away, 900).state, 'unknown');
-  assert.equal(s.update(away, 850).state, 'unknown');
+  assert.equal(s.update(away, 1100).state, 'unknown');
+  assert.equal(s.update(away, 1050).state, 'unknown');
 });
 test('unverified calibration without explicit entry consent never emits interactive samples', () => {
   const p = pipeline(); p.positionVerified = false;
@@ -130,6 +130,37 @@ test('camera decisions drive one scene confirmation; blink, offscreen and pause 
   }
   p.interactionEnabled = false;
   for (let t = 5500; t < 7500; t += 100) assert.equal(p.process({ valid: true, features: features(.5, .5) }, t, true).sample.valid, false);
+});
+
+test('basic experience ignores failed partial models but still stops on camera loss and outside gaze', () => {
+  const p = pipeline(); p.basicEntry = true; p.unverifiedEntry = true;
+  p.positionVerified = false; p.screenVerified = false;
+  p.mapping!.coverage = poseCoverage([features(.5, .5, 18)]);
+  p.screenModel = { ...classifier, weights: [-30, ...Array(9).fill(0)] };
+  let r = p.process({ valid: true, features: features(.5, .5) }, 0, true);
+  for (let t = 100; t <= 600; t += 100) r = p.process({ valid: true, features: features(.5, .5) }, t, true);
+  assert.equal(r.sample.valid, true); assert.ok(Math.abs(r.sample.x!-.5)<.01);
+  for (let t = 700; t <= 1600; t += 100) r = p.process({ valid: true, features: features(2, .5) }, t, true);
+  assert.equal(r.sample.invalidReason, 'off-screen');
+  assert.equal(p.process({ valid: false, reason: 'no-face' }, 1700, true).sample.valid, false);
+});
+
+test('failed screen classifier cannot veto opted-in calibrated experience; verified model remains authoritative', () => {
+  const p = pipeline(); p.screenModel = { ...classifier, weights: [-30, ...Array(9).fill(0)] };
+  p.screenVerified = false; p.unverifiedEntry = true;
+  let r = p.process({ valid: true, features: features(.5, .5) }, 0, true);
+  for (let t = 100; t <= 600; t += 100) r = p.process({ valid: true, features: features(.5, .5) }, t, true);
+  assert.equal(r.sample.valid, true); assert.equal(p.screenVerified, false);
+  p.screenVerified = true; p.reset();
+  for (let t = 700; t <= 1300; t += 100) r = p.process({ valid: true, features: features(.5, .5) }, t, true);
+  assert.equal(r.sample.valid, false);
+});
+
+test('300ms camera cadence stabilizes within the existing 500ms camera lifetime', () => {
+  const p = pipeline();
+  assert.equal(p.process({ valid: true, features: features(.5, .5) }, 0, true).sample.valid, false);
+  assert.equal(p.process({ valid: true, features: features(.5, .5) }, 300, true).sample.valid, true);
+  assert.equal(p.process({ valid: true, features: features(.5, .5) }, 900, true).sample.valid, false);
 });
 test('out-of-coverage head pose, half-blink and fullscreen loss cannot enter the scene', () => {
   const p = pipeline();

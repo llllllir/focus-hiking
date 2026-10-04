@@ -1,0 +1,17 @@
+{
+  "input": "Synthetic camera-shaped AttentionPort, not real camera accuracy",
+  "checks": [
+    "forest readiness automatically starts the page without any valid gaze; missing input does not move the camera",
+    "48px transparent gaze ring remains visible with reduced motion and cannot intercept clicks",
+    "pause/resume preserves interaction and hides inactive marker",
+    "next journey also enters automatically without a second start button or gaze gate"
+  ],
+  "marker": {
+    "width": "48px",
+    "height": "48px",
+    "border": "3px",
+    "background": "rgba(0, 0, 0, 0)",
+    "pointerEvents": "none"
+  },
+  "errors": []
+}

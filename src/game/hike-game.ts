@@ -41,7 +41,6 @@ export function mountHikeGame(parent:HTMLElement,attention:AttentionPort,options
   let weather='clear',nextUi=0,frameSum=0,frameCount=0,qualityAt=0,autoLevel=0;
   let qualityWindow:number[]=[];
   const frameTimes:number[]=[];
-  const fresh=(now:number)=>!!latest&&latest.source==='camera'&&latest.valid&&latest.x!==null&&latest.y!==null&&Number.isFinite(latest.x)&&Number.isFinite(latest.y)&&latest.x>=0&&latest.x<=1&&latest.y>=0&&latest.y<=1&&now>=latest.timestampMs&&now-latest.timestampMs<=250;
   const game=mountGame(parent,undefined,{
     hike:true,
     onReady:view=>{forest=view;view.setWeather('clear');view.scene.userData.hikeSource=options.source??'camera';parent.querySelector('.version')!.textContent=options.source==='simulated'?'simulated · 自动化徒步检查':'眼动徒步 · 秋季森林';},
@@ -74,7 +73,7 @@ export function mountHikeGame(parent:HTMLElement,attention:AttentionPort,options
       return !!direction;
     },
   });
-  const panel=document.createElement('section');panel.className='hike-begin';panel.innerHTML=`<p class="eyebrow">FOLLOW YOUR GAZE</p><h1>${options.minutes} 分钟，走进林间。</h1><p>森林准备后，视线保持在屏幕内即可开始。<br>看向哪里，就朝那个方向慢慢走。离屏时停步。</p><button class="primary" id="hike-begin" disabled>准备森林与视线…</button><button class="hike-exit">返回首页</button>`;
+  const panel=document.createElement('section');panel.className='hike-begin';panel.innerHTML=`<p class="eyebrow">FOLLOW YOUR GAZE</p><h1>请将视线移回屏幕，<br>画面即将开始。</h1><p>森林准备完成后自动进入，无需再次检测视线。<br>进入后，看向哪里，就朝那个方向慢慢走。</p><output id="hike-begin" role="status" aria-live="polite">正在准备森林…</output><button class="hike-exit">返回首页</button>`;
   const hud=document.createElement('section');hud.className='hike-hud';hud.hidden=true;
   hud.innerHTML='<div class="journey"><strong id="hike-state" role="status" aria-live="polite">等待视线</strong><span id="hike-clock"></span></div><progress id="hike-progress" max="1" value="0" aria-label="徒步时间进度"></progress><div class="hike-buttons"><button id="hike-pause">暂停</button><button id="hike-stop">结束本次徒步</button><button id="hike-calibrate">重新校准</button></div><small>闭眼或信号不清时停步；无法判断的时间单独记录。</small>';
   const marker=document.createElement('div');marker.className='hike-gaze-marker';marker.hidden=true;marker.setAttribute('aria-hidden','true');
@@ -84,7 +83,7 @@ export function mountHikeGame(parent:HTMLElement,attention:AttentionPort,options
   const save=()=>{const record=session.summary();if(saved||!record)return;const error=archive.save(record);saved=true;if(error)result.dataset.saveError=error;};
   const setText=(element:HTMLElement,text:string)=>{if(element.textContent!==text)element.textContent=text;};
   function updateUi(now:number){
-    if(session.phase==='idle'){const ready=!!forest&&fresh(now)&&(options.isReady?.()??true);get<HTMLButtonElement>('#hike-begin').disabled=!ready;setText(get('#hike-begin'),ready?'开始徒步':forest?'请把视线留在屏幕内':'正在准备森林…');}
+    if(session.phase==='idle'&&forest&&!document.hidden) beginJourney(now);
     const state=session.gazeState(now),paused=session.phase==='paused';
     setText(get('#hike-clock'),`${formatTime(session.elapsedMs)} / ${session.plannedMinutes}:00`);
     get<HTMLProgressElement>('#hike-progress').value=session.elapsedMs/(session.plannedMinutes*60000);
@@ -103,7 +102,7 @@ export function mountHikeGame(parent:HTMLElement,attention:AttentionPort,options
     get('.hike-badges').textContent=progress.badges.join(' · ');
     renderArchive(get('.hike-archive'),archive);
     get('#hike-download').onclick=()=>downloadHikes([record]);
-    get('#hike-again').onclick=()=>{const minutes=Number(parent.querySelector<HTMLInputElement>('input[name="next-duration"]:checked')!.value) as 5|10|15;session=new HikeSession(minutes,options.source??'camera');saved=false;shown=false;for(const child of parent.children)if(child instanceof HTMLElement)child.inert=false;result.hidden=true;panel.hidden=false;get('#hike-pause').textContent='暂停';panel.querySelector('h1')!.textContent=`${minutes} 分钟，走进林间。`;nextUi=0;};
+    get('#hike-again').onclick=()=>{const minutes=Number(parent.querySelector<HTMLInputElement>('input[name="next-duration"]:checked')!.value) as 5|10|15;session=new HikeSession(minutes,options.source??'camera');saved=false;shown=false;for(const child of parent.children)if(child instanceof HTMLElement)child.inert=false;result.hidden=true;panel.hidden=false;get('#hike-pause').textContent='暂停';panel.querySelector('h1')!.textContent='请将视线移回屏幕，画面即将开始。';nextUi=0;};
     get('.hike-result .hike-exit').onclick=options.onExit;
     get<HTMLButtonElement>('#hike-again').focus();
   }
@@ -112,11 +111,11 @@ export function mountHikeGame(parent:HTMLElement,attention:AttentionPort,options
     if(['not-calibrated','fullscreen-required','position-unverified','screen-unverified'].includes(sample.invalidReason??'')){session.pause(now);get('#hike-pause').textContent='继续';}
     else session.accept(sample,now);
   });
-  const begin=get<HTMLButtonElement>('#hike-begin');begin.onclick=()=>{
-    const now=performance.now();if(!forest||!fresh(now)||!(options.isReady?.()??true))return;
-    session.start(now);session.accept(latest!,now);panel.hidden=true;hud.hidden=false;nextUi=0;
+  function beginJourney(now:number) {
+    if(!forest||disposed||session.phase!=='idle'||document.hidden)return;
+    session.start(now);if(latest)session.accept(latest,now);panel.hidden=true;hud.hidden=false;nextUi=0;
     const sound=get<HTMLButtonElement>('#storm-sound');if(sound.getAttribute('aria-pressed')!=='true')sound.click();
-  };
+  }
   get('.hike-begin .hike-exit').onclick=options.onExit;
   get('#hike-stop').onclick=()=>{session.stop(performance.now());save();forest?.setWeather('clear');weather='clear';get<HTMLSelectElement>('#weather').value='clear';showResult();};
   get('#hike-pause').onclick=()=>{if(session.phase==='running'){session.pause(performance.now());get('#hike-pause').textContent='继续';}else if(session.phase==='paused'&&(options.isReady?.()??true)){const now=performance.now();session.resume(now);if(latest)session.accept(latest,now);get('#hike-pause').textContent='暂停';}nextUi=0;};

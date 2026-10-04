@@ -6,8 +6,8 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright-core');
   const page=await browser.newPage({viewport:{width:1600,height:1000}}),errors=[];
   page.on('pageerror',e=>errors.push(e.message));
   await page.goto((process.env.HIKE_URL||'http://127.0.0.1:5177')+'/tests/hike-harness.html');
-  await page.waitForFunction(()=>window.__hikeFixture?.game.forest&&document.querySelector('#hike-begin')?.disabled===false,null,{timeout:90000});
-  await page.locator('#hike-begin').click();
+  await page.waitForFunction(()=>window.__hikeFixture?.game.forest&&document.querySelector('.hike-hud')?.hidden === false,null,{timeout:90000});
+  await page.locator('.hike-hud').waitFor({ state: 'visible' });
   await page.waitForTimeout(20000);console.log('Warm-up complete; measuring 60 seconds of simulated walking');
   await page.evaluate(()=>{window.__perfFrames=[];window.__perfStart=performance.now();let previous=performance.now();function collect(now){window.__perfFrames.push(now-previous);previous=now;window.__perfRequest=requestAnimationFrame(collect)}window.__perfRequest=requestAnimationFrame(collect)});
   for(let i=0;i<3;i++){await page.waitForTimeout(20000);console.log(`Measured ${(i+1)*20} seconds`)}

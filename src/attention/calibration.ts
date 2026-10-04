@@ -5,7 +5,7 @@ const poseNames = ['yaw', 'pitch', 'roll', 'faceX', 'faceY', 'faceScale'] as con
 export type PoseCoverage = Record<typeof poseNames[number], [number, number]>;
 
 export function poseCoverage(samples: EyeFeatures[]): PoseCoverage {
-  const padding = [3, 3, 4, .025, .025, .035];
+  const padding = [6, 6, 7, .04, .04, .05];
   return Object.fromEntries(poseNames.map((name, i) => [name,
     [(percentile(samples.map(s => s[name]), .05) ?? 0) - padding[i], (percentile(samples.map(s => s[name]), .95) ?? 0) + padding[i]],
   ])) as PoseCoverage;

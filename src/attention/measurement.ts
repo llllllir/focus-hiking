@@ -1,3 +1,4 @@
+import { entryPolicy } from './entry-policy';
 export interface MeasurementRow {
   timestampMs: number;
   targetId: string;
@@ -25,9 +26,9 @@ export function measurementSummary(rows: MeasurementRow[]) {
     pipelineP95: percentile(rows.map(r => r.pipelineMs).filter(v => v > 0), .95) };
 }
 export function measurementsCsv(rows: MeasurementRow[]): string {
-  const header = 'source,timestampMs,targetId,targetX,targetY,x,y,valid,invalidReason,width,height,processingMs,pipelineMs';
+  const header = 'source,entryPolicy,timestampMs,targetId,targetX,targetY,x,y,valid,invalidReason,width,height,processingMs,pipelineMs';
   const cell = (v: unknown) => `"${String(v ?? '').replaceAll('"', '""')}"`;
-  return '\uFEFF' + [header, ...rows.map(r => ['camera', r.timestampMs, r.targetId, r.targetX, r.targetY, r.x, r.y, r.valid,
+  return '\uFEFF' + [header, ...rows.map(r => ['camera', entryPolicy.id, r.timestampMs, r.targetId, r.targetX, r.targetY, r.x, r.y, r.valid,
     r.reason, r.width, r.height, r.processingMs, r.pipelineMs].map(cell).join(','))].join('\r\n');
 }
 export class TimeSmoother {
@@ -50,5 +51,6 @@ export function screenSummary(rows: { inside: boolean; state: 'on-screen' | 'off
   const falseOn = ratio(off.filter(r => r.state === 'on-screen').length, off.length), falseOff = ratio(on.filter(r => r.state === 'off-screen').length, on.length);
   const onRecall = on.length ? on.filter(r => r.state === 'on-screen').length / on.length : 0, offRecall = off.length ? off.filter(r => r.state === 'off-screen').length / off.length : 0;
   const unknown = ratio(rows.filter(r => r.state === 'unknown').length, rows.length);
-  return { falseOn, falseOff, onRecall, offRecall, unknown, passed: !!on.length && !!off.length && falseOn <= .05 && falseOff <= .05 && onRecall >= .9 && offRecall >= .9 && unknown <= .1 };
+  const gate = entryPolicy.screen;
+  return { falseOn, falseOff, onRecall, offRecall, unknown, passed: !!on.length && !!off.length && falseOn <= gate.falseOn && falseOff <= gate.falseOff && onRecall >= gate.recall && offRecall >= gate.recall && unknown <= gate.unknown };
 }

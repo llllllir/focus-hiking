@@ -1,6 +1,7 @@
 import type { EyeFeatures } from './features';
 import { coveredPose, poseCoverage } from './calibration';
 import type { PoseCoverage } from './calibration';
+import { entryPolicy } from './entry-policy';
 
 export type ScreenState = 'on-screen' | 'off-screen' | 'unknown';
 export interface ScreenStatus { state: ScreenState; reason: string; score: number | null; timestampMs: number; source: 'camera' }
@@ -49,11 +50,11 @@ export function fitScreen(rows: ScreenRow[]): ScreenModel {
     const model = train(rows.filter(r => r.round !== round));
     for (const inside of [true, false]) {
       const held = rows.filter(r => r.round === round && r.inside === inside);
-      rates.push(held.filter(r => inside ? screenScore(model, r.features) >= .65 : screenScore(model, r.features) <= .35).length / held.length);
+      rates.push(held.filter(r => inside ? screenScore(model, r.features) >= entryPolicy.classifier.onScore : screenScore(model, r.features) <= entryPolicy.classifier.offScore).length / held.length);
     }
   }
   const balancedAccuracy = rates.reduce((a, b) => a + b, 0) / rates.length;
-  if (Math.min(...rates) < .7 || balancedAccuracy < .8) throw new Error('屏幕内外信号区分不足，请调整光照、保持眼部可见后重新采样');
+  if (Math.min(...rates) < entryPolicy.classifier.foldRecall || balancedAccuracy < entryPolicy.classifier.balancedAccuracy) throw new Error('屏幕内外信号区分不足，请调整光照、保持眼部可见后重新采样');
   return { ...train(rows), balancedAccuracy };
 }
 export function screenEvidence(model: ScreenModel | null, f: EyeFeatures, raw: { x: number; y: number }, margin: { x: number; y: number }, fullscreen: boolean): { state: ScreenState; reason: string; score: number | null } {
@@ -61,10 +62,13 @@ export function screenEvidence(model: ScreenModel | null, f: EyeFeatures, raw: {
   if (!model) return { state: 'unknown', reason: 'screen-not-calibrated', score: null };
   if (!coveredPose(f, model.coverage)) return { state: 'unknown', reason: 'calibration-range', score: null };
   const score = screenScore(model, f);
+  // A poor CV margin must not swallow most of the screen in easy-entry mode.
+  // Keep the raw prediction and a nonzero boundary band; do not clamp validation errors.
+  margin = { x: Math.min(margin.x, entryPolicy.classifier.marginCap), y: Math.min(margin.y, entryPolicy.classifier.marginCap) };
   const inside = raw.x - margin.x >= 0 && raw.x + margin.x <= 1 && raw.y - margin.y >= 0 && raw.y + margin.y <= 1;
   const outside = raw.x + margin.x < 0 || raw.x - margin.x > 1 || raw.y + margin.y < 0 || raw.y - margin.y > 1;
-  if (inside && score >= .65) return { state: 'on-screen', reason: 'on-screen', score };
-  if (outside && score <= .35) return { state: 'off-screen', reason: 'off-screen', score };
+  if (inside && score >= entryPolicy.classifier.onScore) return { state: 'on-screen', reason: 'on-screen', score };
+  if (outside && score <= entryPolicy.classifier.offScore) return { state: 'off-screen', reason: 'off-screen', score };
   return { state: 'unknown', reason: 'screen-uncertain', score };
 }
 export class ScreenStabilizer {

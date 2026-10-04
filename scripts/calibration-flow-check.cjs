@@ -3,7 +3,7 @@ const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright-core')
 const { media, fixture, finishTask } = require('./gaze-upgrade-browser-check.cjs');
 const base = process.env.HIKE_URL || 'http://127.0.0.1:5177';
 (async () => {
-  const out = path.resolve('docs/acceptance/calibration-flow'); fs.mkdirSync(out, { recursive: true });
+  const out = path.resolve('docs/acceptance/easy-entry'); fs.mkdirSync(out, { recursive: true });
   const browser = await chromium.launch({ channel: 'msedge', headless: true, args: ['--enable-webgpu', '--ignore-gpu-blocklist'] });
   const report = { input: 'Synthetic camera/Worker; not human accuracy or real inference performance', checks: [], errors: [] };
   try {
@@ -20,6 +20,7 @@ const base = process.env.HIKE_URL || 'http://127.0.0.1:5177';
     await page.waitForFunction(() => !!document.fullscreenElement);
     await page.locator('[data-action="start"]').click();
     await page.waitForFunction(() => !document.querySelector('[data-action="guided"]').disabled);
+    await page.evaluate(() => { window.__fixture.validationOffset = { x: .16, y: .08 }; window.__fixture.missingScreenTargets = ['edge00', 'away0']; });
     await page.locator('[data-action="guided"]').click();
     await page.waitForFunction(() => document.querySelector('.gaze-task-progress').textContent.startsWith('3 /'));
     const progress = await page.locator('.gaze-task-progress').innerText();
@@ -33,7 +34,7 @@ const base = process.env.HIKE_URL || 'http://127.0.0.1:5177';
     assert.match(await page.locator('.gaze-report').innerText(), /达到位置门槛/);
     assert.match(await page.locator('.gaze-screen-report').innerText(), /达到交互启用条件/);
     console.log('Guided calibration passed at synthetic 11.7 Hz');
-    report.checks.push('47-step guided calibration and unchanged independent accuracy gates at reduced synthetic cadence', 'background resumes current point without losing completed targets');
+    report.checks.push('40-step guided flow: 15 position + 5 independent position + 10 screen calibration + 10 independent screen', 'moderate position offset and 20% unknown screen validation pass the user-authorized easy-entry policy', 'background resumes current point without losing completed targets');
     report.calibration = { position: await page.locator('.gaze-report').innerText(), screen: await page.locator('.gaze-screen-report').innerText(), cadence: await page.locator('.gaze-performance').innerText() };
     await page.screenshot({ path: path.join(out, 'validated-synthetic.png') });
     await page.evaluate(() => { window.__fixture.invalid = true; });

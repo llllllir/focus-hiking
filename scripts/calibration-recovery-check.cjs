@@ -15,7 +15,7 @@ const { media, fixture } = require('./gaze-upgrade-browser-check.cjs');
     await page.evaluate(() => { window.__fixture.invalid = true; });
     await page.locator('[data-action="guided"]').click();
     await page.waitForFunction(() => document.querySelector('.gaze-task-instruction').textContent.includes('之前的进度已保留'), null, { timeout: 15000 });
-    assert.match(await page.locator('.gaze-task-progress').innerText(), /^1 \/ 22/);
+    assert.match(await page.locator('.gaze-task-progress').innerText(), /^1 \/ 15/);
     assert.equal(await page.locator('[data-action="scene"]').isDisabled(), true);
     await page.evaluate(() => { window.__fixture.invalid = false; });
     await page.locator('[data-action="sample"]').click();
@@ -35,7 +35,7 @@ const { media, fixture } = require('./gaze-upgrade-browser-check.cjs');
     await page.locator('[data-action="stop"]').click();
     assert.ok(await page.evaluate(() => window.__mediaStops > 0)); assert.deepEqual(errors, []);
     const report = { input: 'Synthetic camera and Worker; no human accuracy claim', checks: ['insufficient samples pause after two retries instead of losing the round', 'retry current point recovers without accepting invalid samples', 'Worker failure cancels guided task, displays original error and permits camera restart', 'cancel never enables interaction; stop releases stream'], errors };
-    const out = path.resolve('docs/acceptance/calibration-flow'); fs.mkdirSync(out, { recursive: true });
+    const out = path.resolve('docs/acceptance/easy-entry'); fs.mkdirSync(out, { recursive: true });
     fs.writeFileSync(path.join(out, 'recovery.json'), JSON.stringify(report, null, 2)); console.log(JSON.stringify(report));
   } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });

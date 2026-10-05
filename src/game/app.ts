@@ -1,4 +1,5 @@
 import { createForest } from '../scene/forest';
+import { forestVolume, setForestVolume, unlockForestAudio } from '../scene/audio-context';
 import type { ForestView } from '../scene/forest';
 import { Tour } from './tour';
 import { findTrailPath, nearestTrack, TrailWalker } from './navigation';
@@ -29,10 +30,19 @@ export function mountGame(app: HTMLElement, attention?: AttentionPort, options: 
   qualitySelect.addEventListener('change',()=>{forest?.setQuality(qualitySelect.value);const url=new URL(location.href);url.searchParams.set('quality',qualitySelect.value);history.replaceState(null,'',url);});
   const weatherSelect=get<HTMLSelectElement>('#weather');weatherSelect.value=new URLSearchParams(location.search).get('weather')==='rain'?'rain':'clear';
   if(options.hike)weatherSelect.insertAdjacentHTML('beforeend','<option value="cloudy">阴天 · 雷声</option>');
-  const soundButton=get<HTMLButtonElement>('#storm-sound');let soundsOn=false;
-  const enableSound=async()=>{if(!forest)return;try{await forest.armAudio();forest.mute(false);soundsOn=true;soundButton.textContent='静音';soundButton.setAttribute('aria-pressed','true');}catch{soundsOn=false;soundButton.textContent='重试环境声音';}};
-  weatherSelect.addEventListener('change',()=>{forest?.setWeather(weatherSelect.value==='rain'?'rain':'clear');const url=new URL(location.href);url.searchParams.set('weather',weatherSelect.value);history.replaceState(null,'',url);if(weatherSelect.value==='rain')void enableSound();});
-  soundButton.onclick=()=>{if(soundsOn){forest?.mute(true);soundsOn=false;soundButton.textContent='开启环境声音';soundButton.setAttribute('aria-pressed','false');}else void enableSound();};
+  const soundButton=get<HTMLButtonElement>('#storm-sound');let soundsOn=false,soundWanted=false,soundPending:Promise<void>|null=null;
+  soundButton.insertAdjacentHTML('afterend',` <label>音量 <input id="sound-volume" type="range" min="0" max="100" step="5" value="${Math.round(forestVolume()*100)}" aria-label="环境声音音量" style="width:90px;vertical-align:middle"><output id="sound-volume-value">${Math.round(forestVolume()*100)}%</output></label>`);
+  const enableSound=()=>{
+    if(!forest)return Promise.resolve();soundWanted=true;if(soundPending)return soundPending;
+    const view=forest;soundButton.textContent='正在开启声音…';
+    soundPending=(async()=>{try{await view.armAudio();if(disposed||view!==forest||!soundWanted)return;view.mute(false);soundsOn=true;soundButton.textContent='静音';soundButton.setAttribute('aria-pressed','true');soundButton.title='环境声音已开启';}catch{if(disposed||view!==forest||!soundWanted)return;view.mute(true);soundsOn=false;soundButton.textContent='点击开启环境声音';soundButton.setAttribute('aria-pressed','false');soundButton.title='声音未启动，请点击重试；也请检查系统音量';}finally{soundPending=null;}})();
+    return soundPending;
+  };
+  weatherSelect.addEventListener('change',()=>{forest?.setWeather(weatherSelect.value==='rain'?'rain':'clear');const url=new URL(location.href);url.searchParams.set('weather',weatherSelect.value);history.replaceState(null,'',url);if(soundWanted)void enableSound();});
+  soundButton.onclick=()=>{if(soundsOn){soundWanted=false;forest?.mute(true);soundsOn=false;soundButton.textContent='开启环境声音';soundButton.setAttribute('aria-pressed','false');}else void enableSound();};
+  get<HTMLInputElement>('#sound-volume').oninput=event=>{const value=Number((event.target as HTMLInputElement).value);setForestVolume(value/100);get('#sound-volume-value').textContent=`${value}%`;};
+  const audioGesture=(event:Event)=>{if(!event.isTrusted||!soundWanted||soundsOn||event.target===soundButton)return;void unlockForestAudio().catch(()=>{});void enableSound();};
+  app.addEventListener('pointerdown',audioGesture,true);app.addEventListener('keydown',audioGesture,true);
   const host = get<HTMLDivElement>('.scene-host');
   const start = get<HTMLButtonElement>('#start');
   const controls = get<HTMLElement>('.controls');
@@ -231,7 +241,7 @@ export function mountGame(app: HTMLElement, attention?: AttentionPort, options: 
     const record = {
         version: '场景2.0', source: options.hike ? forest?.scene.userData.hikeSource : exploring ? navigationSource : 'simulated', visualAcceptance: 'not-reviewed', cameraImplemented: options.hike && forest?.scene.userData.hikeSource === 'camera',
         cameraInputConnected: !!attention || (options.hike && forest?.scene.userData.hikeSource === 'camera'),
-      weather: weatherSelect.value, audioEnabled: soundsOn, audioSource: 'original Web Audio synthesis / HRTF',
+      weather: weatherSelect.value, audioEnabled: soundsOn, audioVolume:forestVolume(), audioSource: 'local credited forest recordings + original Web Audio weather / HRTF',
       scenery: forest?.scenery(), bodyPosition: forest?.position(), mode: planning ? 'route' : 'free',
       sceneRevision:'forest-weather-ecology-rig-1',ecology:forest?.scene.userData.ecology,wildlife:forest?.scene.userData.wildlife,
       trackStatus:trackStatus.textContent,mapFollow:followMap,
@@ -256,6 +266,6 @@ export function mountGame(app: HTMLElement, attention?: AttentionPort, options: 
     subscribeEvents(listener) { sceneListeners.add(listener); return () => { sceneListeners.delete(listener); }; },
     handleCommand() { throw new Error('M1 自动游览尚不支持训练命令；请在 M4 契约审查后接入。'); },
   };
-  return { ...port, dispose() { disposed = true; attempt++; offSamples?.(); offEvents?.(); attention?.setTargets([]); cancelAnimationFrame(frame); forest?.dispose(); sceneListeners.clear(); window.removeEventListener('resize', resize); window.removeEventListener('keydown', keyDown); window.removeEventListener('keyup', keyUp); window.removeEventListener('blur', blur); document.removeEventListener('visibilitychange', visibility); host.removeEventListener('pointerdown', pointerDown); host.removeEventListener('pointermove', pointerMove); host.removeEventListener('pointerup', pointerUp); host.removeEventListener('pointercancel', blur); host.removeEventListener('webglcontextlost', contextLost, true); app.replaceChildren(); } };
+  return { ...port, dispose() { disposed = true; attempt++; offSamples?.(); offEvents?.(); attention?.setTargets([]); cancelAnimationFrame(frame); forest?.dispose(); sceneListeners.clear(); app.removeEventListener('pointerdown',audioGesture,true);app.removeEventListener('keydown',audioGesture,true);window.removeEventListener('resize', resize); window.removeEventListener('keydown', keyDown); window.removeEventListener('keyup', keyUp); window.removeEventListener('blur', blur); document.removeEventListener('visibilitychange', visibility); host.removeEventListener('pointerdown', pointerDown); host.removeEventListener('pointermove', pointerMove); host.removeEventListener('pointerup', pointerUp); host.removeEventListener('pointercancel', blur); host.removeEventListener('webglcontextlost', contextLost, true); app.replaceChildren(); } };
 }
 

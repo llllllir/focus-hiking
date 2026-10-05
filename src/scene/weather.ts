@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { acquireForestAudio, releaseForestAudio, resumeForestAudio } from './audio-context';
 
 export type WeatherMode = 'clear' | 'rain' | 'cloudy';
 
@@ -20,9 +21,9 @@ class StormAudio {
   }
   async arm() {
     if(!this.context){
-      this.context=new AudioContext();this.master=this.context.createGain();this.master.gain.value=0;this.master.connect(this.context.destination);
+      const audio=acquireForestAudio();this.context=audio.context;this.master=this.context.createGain();this.master.gain.value=0;this.master.connect(audio.output);
       const noise=this.noise(9);
-      for(const [frequency,gain,x,z] of [[2800,.13,-8,-5],[1800,.12,9,-8],[480,.18,-15,2],[6000,.045,2,5]]){
+      for(const [frequency,gain,x,z] of [[2800,.24,-8,-5],[1800,.22,9,-8],[480,.28,-15,2],[6000,.08,2,5]]){
         const source=this.context.createBufferSource();source.buffer=noise;source.loop=true;
         const filter=this.context.createBiquadFilter();filter.type='bandpass';filter.frequency.value=frequency;filter.Q.value=.65;
         const envelope=this.context.createGain();envelope.gain.value=gain;
@@ -33,21 +34,21 @@ class StormAudio {
       const tapping=this.context.createBuffer(1,this.context.sampleRate*7,this.context.sampleRate),data=tapping.getChannelData(0);
       for(let t=0;t<7;t+=.028+Math.random()*.12){const begin=Math.floor(t*this.context.sampleRate);for(let k=0;k<600&&begin+k<data.length;k++)data[begin+k]+=(Math.random()*2-1)*Math.exp(-k/95)*.22;}
       const taps=this.context.createBufferSource();taps.buffer=tapping;taps.loop=true;
-      const gain=this.context.createGain();gain.gain.value=.16;const pan=this.context.createStereoPanner();pan.pan.value=.6;
-      taps.connect(gain).connect(pan).connect(this.master);taps.start();this.loops.push({source:taps,gain,volume:.16});
+      const gain=this.context.createGain();gain.gain.value=.24;const pan=this.context.createStereoPanner();pan.pan.value=.6;
+      taps.connect(gain).connect(pan).connect(this.master);taps.start();this.loops.push({source:taps,gain,volume:.24});
     }
-    await this.context.resume();this.apply();
+    await resumeForestAudio(this.context);this.apply();
   }
   private apply(){if(this.context&&this.master){
-    this.master.gain.setTargetAtTime(this.rain&&!this.muted ? .7 : 0,this.context.currentTime,.35);
-    this.loops.forEach((loop,i)=>loop.gain.gain.setTargetAtTime(this.cloudy?(i===2?.06:0):loop.volume,this.context!.currentTime,.2));
+    this.master.gain.setTargetAtTime(this.rain&&!this.muted ? .95 : 0,this.context.currentTime,.35);
+    this.loops.forEach((loop,i)=>loop.gain.gain.setTargetAtTime(this.cloudy?(i===2?.12:0):loop.volume,this.context!.currentTime,.2));
   }}
   setRain(rain:boolean,cloudy=false){this.rain=rain||cloudy;this.cloudy=cloudy;this.apply();if(!this.rain){for(const source of this.transient){try{source.stop();}catch{/* already ended */}}this.transient.clear();}}
   setMuted(muted:boolean){this.muted=muted;this.apply();}
   thunder(position:THREE.Vector3) {
     const ctx=this.context;if(!ctx||ctx.state!=='running'||!this.rain)return;
     const now=ctx.currentTime;
-    for(const [delay,duration,frequency,peak,distance] of [[2.4,7,95,.16,75],[4.5,5,150,.2,36],[7.8,2.8,260,.25,9]]){
+    for(const [delay,duration,frequency,peak,distance] of [[2.4,7,95,.28,75],[4.5,5,150,.34,36],[7.8,2.8,260,.4,9]]){
       const source=ctx.createBufferSource();source.buffer=this.noise(duration);
       const filter=ctx.createBiquadFilter();filter.type='lowpass';filter.frequency.value=frequency;
       const envelope=ctx.createGain();envelope.gain.setValueAtTime(0,now+delay);envelope.gain.linearRampToValueAtTime(peak,now+delay+.07);envelope.gain.exponentialRampToValueAtTime(.0001,now+delay+duration);
@@ -62,7 +63,7 @@ class StormAudio {
     l.forwardX.value=forward.x;l.forwardY.value=forward.y;l.forwardZ.value=forward.z;l.upX.value=up.x;l.upY.value=up.y;l.upZ.value=up.z;
     for(const loop of this.loops)if(loop.pan&&loop.offset){const p=loop.offset.clone().applyQuaternion(camera.quaternion).add(camera.position);loop.pan.positionX.value=p.x;loop.pan.positionY.value=p.y;loop.pan.positionZ.value=p.z;}
   }
-  dispose(){this.loops.forEach(l=>l.source.stop());this.transient.forEach(s=>{try{s.stop();}catch{/* ended */}});void this.context?.close();}
+  dispose(){this.loops.forEach(l=>l.source.stop());this.transient.forEach(s=>{try{s.stop();}catch{/* ended */}});this.master?.disconnect();if(this.context)releaseForestAudio(this.context);this.context=null;}
 }
 
 export function createWeather(scene:THREE.Scene,camera:THREE.PerspectiveCamera,ground:THREE.Object3D[],sample?: (x:number,z:number)=>{point:THREE.Vector3}|null) {
@@ -113,7 +114,7 @@ export function createWeather(scene:THREE.Scene,camera:THREE.PerspectiveCamera,g
     bolt.visible=!reducedMotion;flashRemaining=.2;audio.thunder(camera.position);
   }
   return {
-    setMode,mode:()=>mode,armAudio:()=>audio.arm(),mute:(muted:boolean)=>audio.setMuted(muted),
+    setMode,mode:()=>mode,armAudio:()=>{const ready=audio.arm();audio.listener(camera);return ready;},mute:(muted:boolean)=>audio.setMuted(muted),
     update(dt:number){
       audio.listener(camera);if(mode==='clear')return;time+=dt;
       flashRemaining-=dt;if(flashRemaining<=0)bolt.visible=false;

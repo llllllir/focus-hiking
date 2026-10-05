@@ -3,9 +3,14 @@ import { CameraAttention } from './attention/camera';
 import { browserEnvironments, quickEntryKind, sameEnvironment } from './attention/environment';
 import { browserArchive, renderArchive, mountHikeGame } from './game/hike-game';
 import './mountains-home.css';
+import { retainForestAudio, unlockForestAudio } from './scene/audio-context';
 
 /** Page composition; environment storage and camera parameters stay in A's module. */
 export function mountHikeExperience(parent: HTMLElement) {
+  const releaseAudio = retainForestAudio();
+  const unlockAudio = (event: Event) => { if (event.isTrusted) void unlockForestAudio().catch(() => {}); };
+  parent.addEventListener('pointerdown', unlockAudio, true);
+  parent.addEventListener('keydown', unlockAudio, true);
   const archive = browserArchive(), environments = browserEnvironments();
   let disposed = false, setupDispose: (() => void) | null = null, gameDispose: (() => void) | null = null, entering = false, epoch = 0;
   let minutes: 5 | 10 | 15 = 5;
@@ -118,5 +123,5 @@ export function mountHikeExperience(parent: HTMLElement) {
     }
     const back = document.createElement('button'); back.className = 'hike-setup-back'; back.textContent = '返回首页'; back.onclick = home; calibration.append(back);
   };
-  home(); return () => { if (disposed) return; disposed = true; clear(); parent.replaceChildren(); };
+  home(); return () => { if (disposed) return; disposed = true; clear(); parent.removeEventListener('pointerdown', unlockAudio, true); parent.removeEventListener('keydown', unlockAudio, true); releaseAudio(); parent.replaceChildren(); };
 }

@@ -18,6 +18,8 @@ TypeScript + Vite + Three.js；浏览器 getUserMedia；本地 MediaPipe Face La
 
 ## 修改边界
 
+2026-10-05 晴雨声音修补：用户明确要求仅调整游戏晴天/雨天声音，授权本轮在 B 场景/游戏模块修改音频启动、混音、连续环境底音与音量控件；组合首页只加入用户操作时的音频解锁和生命周期释放。单 agent 顺序处理，保留 B 归属与真人审查，不修改眼动规则、校准门槛、地图或共享契约。实际结果见 `docs/acceptance/weather-audio/README.md`。
+
 2026-10-04 自动进入修订：用户明确要求游戏准备页只作提示、森林加载完成自动进入，放大视线指示；授权对 B 的 `src/game/hike-game.ts` 与 `hike.css` 作本需求内修改，单 agent 顺序处理，不以 B 身份提交或审查。行走的实时信号门控保留，共享接口不变。记录见 `docs/acceptance/automatic-entry/README.md`。
 
 2026-10-04 环境存档迭代：用户明确要求更名“此刻山间 · Here in the Mountains”、成功校准本机存档复用、同环境测试三次后免测体验。授权仅在本浏览器持久化必要模型/聚合基线和环境签名，不保存或上传图像、逐帧特征，不把私人校准档案提交 Git；覆盖原默认会话存储限制。A 实现本机存档、组合首页及测试；B app 只按明确更名要求替换顶栏品牌文字。三次失败后基础眼动仍标记未达标，不算成功模型或 M2 验收；详见 `docs/environment-archives.md`。

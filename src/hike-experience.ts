@@ -3,6 +3,7 @@ import { CameraAttention } from './attention/camera';
 import { browserEnvironments, quickEntryKind, sameEnvironment } from './attention/environment';
 import { browserArchive, renderArchive, mountHikeGame } from './game/hike-game';
 import './mountains-home.css';
+import { sitePath } from './site-path';
 import { retainForestAudio, unlockForestAudio } from './scene/audio-context';
 
 /** Page composition; environment storage and camera parameters stay in A's module. */
@@ -20,14 +21,14 @@ export function mountHikeExperience(parent: HTMLElement) {
     if (disposed) return;
     clear(); document.title = '此刻山间 · Here in the Mountains';
     parent.innerHTML = `<main class="hike-landing mountains-home">
-      <section class="hike-home-copy"><a class="brand" href="/">此刻山间<span>Here in the Mountains</span></a>
+      <section class="hike-home-copy"><a class="brand" href="${sitePath()}">此刻山间<span>Here in the Mountains</span></a>
         <p class="eyebrow">A MOMENT TO WANDER. A PLACE TO BE.</p><h1>目光慢下来，<br>此刻在山间。</h1>
         <p>把片刻留给自己，把目光交给山林。<br>沿着视线缓缓前行，在一段安静的山路上，回到此刻。</p>
         <fieldset class="hike-duration"><legend>给自己留一点时间</legend>${[5, 10, 15].map(m => `<label><input type="radio" name="duration" value="${m}" ${m === minutes ? 'checked' : ''}>${m} 分钟</label>`).join('')}</fieldset>
         <label class="environment-select">本次使用的环境<select id="environment-select" aria-label="本次使用的环境"></select></label>
         <button class="primary" id="hike-setup">校准并开始</button>
         <p class="hike-note">第一次准备好目光，以后从环境存档轻松出发。<br>同一环境完成三次测试后，未达标也可直接体验。</p>
-        <a class="mountains-explore" href="/?mode=explore">暂不开摄像头，用鼠标与键盘漫步</a>
+        <a class="mountains-explore" href="${sitePath('?mode=explore')}">暂不开摄像头，用鼠标与键盘漫步</a>
         <details><summary>我的徒步记录</summary><div class="hike-home-archive"></div></details>
       </section>
       <section class="environment-panel" aria-labelledby="environment-title"><p class="eyebrow">YOUR FAMILIAR PLACE</p><h2 id="environment-title">从熟悉的环境出发</h2>
@@ -95,7 +96,7 @@ export function mountHikeExperience(parent: HTMLElement) {
       setupDispose = mountGazeTest(calibration, { onSceneReady: enter, environment: { store: environments, id: selectedId } });
       const title = calibration.querySelector('.gaze-intro h1'); if (title) title.textContent = `准备 ${minutes} 分钟的山间漫步`;
     } else {
-      calibration.innerHTML = '<main class="environment-loading"><a class="brand" href="/">此刻山间 · Here in the Mountains</a><h1>回到熟悉的山间。</h1><p class="gaze-status" role="status">正在开启全屏与摄像头，加载环境存档…</p><button id="environment-retry">重试加载</button><button id="environment-recalibrate">重新校准此环境</button><p>不会重复眼动测试。坐姿或光照改变时，请重新校准。</p></main>';
+      calibration.innerHTML = `<main class="environment-loading"><a class="brand" href="${sitePath()}">此刻山间 · Here in the Mountains</a><h1>回到熟悉的山间。</h1><p class="gaze-status" role="status">正在开启全屏与摄像头，加载环境存档…</p><button id="environment-retry">重试加载</button><button id="environment-recalibrate">重新校准此环境</button><p>不会重复眼动测试。坐姿或光照改变时，请重新校准。</p></main>`;
       const status = calibration.querySelector<HTMLElement>('.gaze-status')!;
       const camera = new CameraAttention(() => {}, message => { status.textContent = message; });
       setupDispose = () => camera.dispose();

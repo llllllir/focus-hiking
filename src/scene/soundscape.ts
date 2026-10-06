@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { sitePath } from '../site-path';
 import { acquireForestAudio, releaseForestAudio, resumeForestAudio } from './audio-context';
 export type WildlifeSound = 'splash'|'frog'|'eagle'|'peck'|'kingfisher'|'wings'|'leaves'|'claws'|'fox';
 
@@ -31,7 +32,7 @@ export class ForestSoundscape {
     this.master.connect(limiter).connect(audio.output);
     const names=['great-tit','sparrows','leaf-rustle','quiet-stream','frog','peck','fox','eagle'];
     await Promise.all(names.map(async name=>{
-      const response=await fetch('/audio/forest/'+name+'.mp3');if(!response.ok)throw Error('声景资源加载失败: '+name);
+      const response=await fetch(sitePath('audio/forest/'+name+'.mp3'));if(!response.ok)throw Error('声景资源加载失败: '+name);
       const buffer=await ctx.decodeAudioData(await response.arrayBuffer());
       // Raise quiet recordings while protecting peaks; source files stay intact.
       let peak=0,energy=0,count=0;for(let c=0;c<buffer.numberOfChannels;c++){const d=buffer.getChannelData(c);for(const v of d){peak=Math.max(peak,Math.abs(v));energy+=v*v;count++;}}

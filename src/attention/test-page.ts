@@ -48,7 +48,7 @@ export function mountGazeTest(parent: HTMLElement, options: { onSceneReady?: (ca
       <div class="gaze-eye-caption">眼球转动示意 <span class="gaze-source">camera</span></div>
       <p class="gaze-eye-status">等待真实摄像头输入</p><strong class="gaze-screen-state" data-state="unknown">无法判断</strong>
       <small>仅在本机处理；眼球图是特征驱动示意。</small></aside>
-    <header class="gaze-heading"><a href="/">此刻山间 · Here in the Mountains</a><span>校准 → 验证 → 场景交互</span></header>
+    <header class="gaze-heading"><a href="${import.meta.env.BASE_URL}">此刻山间 · Here in the Mountains</a><span>校准 → 验证 → 场景交互</span></header>
     <div class="gaze-axis-label gaze-left">向左看</div><div class="gaze-axis-label gaze-right">向右看</div>
     <div class="gaze-crosshair" aria-hidden="true"></div><div class="gaze-ball is-invalid" aria-label="注视跟随球"></div>
     <section class="gaze-intro"><p class="gaze-eyebrow">FOLLOW YOUR GAZE</p><h1>让目光，带动小球。</h1><p>进入全屏 → 开启摄像头 → 连续校准与验证。<br>跟随圆点；切到后台会暂停，回来只需重试当前点。</p></section>

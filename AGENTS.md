@@ -1,5 +1,7 @@
 # Agent 开发规则
 
+2026-10-06 用户明确授权公开仓库并发布 GitHub Pages。允许本次仅为子目录部署修改场景/游戏的资源与导航路径；共享契约不变。生产产物使用独立 `codex/github-pages-site` 分支，开发继续在既有分支，不合并、不推送 main、不删除任何无关分支。浏览器摄像头检查使用明确标注的合成输入，不代表真人验收。
+
 ## 目标与角色
 
 阅读 `README.md`、`docs/development-plan.md`、`docs/interfaces.md` 和当前 GitHub Issue。A（llllllir）负责本地注视与训练，B（RUI-TW）负责场景与游戏。不要把未实现、模拟演示或未测量结果描述为已通过验收。

@@ -1,0 +1,11 @@
+{
+  "site": "http://127.0.0.1:5193/focus-hiking/",
+  "input": "Manual scene and synthetic Canvas camera; real model/Worker and WebAudio. Not human gaze or listening acceptance.",
+  "checks": [
+    "homepage, cover and navigation load under repository base",
+    "forest model, manual entry, sunny/rain audio and credits load under repository base",
+    "real MediaPipe Worker/model/WASM initialize with explicitly synthetic Canvas camera"
+  ],
+  "errors": [],
+  "failed": []
+}

@@ -1,0 +1,22 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><title>Synthetic camera pipeline regression</title></head><body><button id="connect">连接合成测试输入</button><div id="app"></div><script type="module">
+import '/src/style.css';
+import {CameraAttention} from '/src/attention/camera.ts';
+import {mountHikeGame} from '/src/game/hike-game.ts';
+import {fitRidge} from '/src/attention/regression.ts';
+import {poseCoverage} from '/src/attention/calibration.ts';
+// Worker and media are explicitly injected synthetic fixtures by the check script.
+const f=(x,y)=>{const eye={x:.5-(x-.5)*.22,y:.5+(y-.5)*.18,openness:.25};return{left:eye,right:{...eye},yaw:0,pitch:0,roll:0,faceX:.5,faceY:.5,faceScale:.4,vector:[eye.x,eye.y,eye.x,eye.y,.25,.25,0,0,0,.5,.5,.4]}};
+document.querySelector('#connect').onclick=async()=>{
+  await document.documentElement.requestFullscreen();
+  await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+  const camera=new CameraAttention();await camera.start();
+  const baseline=f(.5,.5),coverage=poseCoverage([baseline]);
+  camera.setMapping({baseline,coverage,model:fitRidge([.1,.5,.9].flatMap(x=>[.1,.5,.9].map(y=>({features:f(x,y).vector,x,y,targetId:`${x}:${y}`}))),.01)});
+  camera.setScreenMapping({means:Array(9).fill(0),scales:Array(9).fill(1),weights:[-30,...Array(9).fill(0)],coverage,balancedAccuracy:0});
+  camera.allowBasicEntry();
+  const game=mountHikeGame(document.querySelector('#app'),camera,{minutes:5,source:'simulated',isReady:()=>camera.interactionReady,onExit:()=>{},onRecalibrate:()=>{}});
+  window.__cameraHike={camera,game,updates:[]};
+  camera.subscribeUpdates(u=>{const list=window.__cameraHike.updates;list.push({valid:u.sample.valid,reason:u.sample.invalidReason,age:performance.now()-u.sample.timestampMs});if(list.length>50)list.shift()});
+  camera.setInteractionEnabled(true);document.querySelector('#connect').hidden=true;
+};
+</script></body></html>

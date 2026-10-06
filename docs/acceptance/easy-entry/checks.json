@@ -1,0 +1,23 @@
+{
+  "input": "Synthetic camera/Worker; not human accuracy or real inference performance",
+  "checks": [
+    "40-step guided flow: 15 position + 5 independent position + 10 screen calibration + 10 independent screen",
+    "moderate position offset and 20% unknown screen validation pass the user-authorized easy-entry policy",
+    "background resumes current point without losing completed targets",
+    "invalid independent validation blocks entry; retrying only validation restores readiness",
+    "actual forest entry, gaze walking, pause/resume, finish, local save and JSON download",
+    "second trip reuses session calibration, saves once, and home releases camera"
+  ],
+  "errors": [],
+  "calibration": {
+    "position": "独立五点验证：55/55 有效（100.0%）\n中位误差 13.9% · P90 13.9% 对角线\n轻松进入门槛：有效≥70%，中位≤15%，P90≤25%\n达到位置门槛，可继续准备游戏；不代表原精度验收通过。",
+    "screen": "独立屏幕状态验证 180 计划样本\n离屏误报屏内 0.0% · 屏内误报离屏 0.0%\n离屏召回 80.0% · 屏内召回 80.0% · 无法判断 20.0%\n本次达到交互启用条件，仍待多人验收。\nedge01 正确 100.0% / 未知 0.0%\ncenter 正确 100.0% / 未知 0.0%\nedge00 正确 0.0% / 未知 100.0%\nedge11 正确 100.0% / 未知 0.0%\naway3 正确 100.0% / 未知 0.0%\naway0 正确 0.0% / 未知 100.0%\naway1 正确 100.0% / 未知 0.0%\naway4 正确 100.0% / 未知 0.0%\naway2 正确 100.0% / 未知 0.0%\nedge10 正确 100.0% / 未知 0.0%",
+    "cadence": "推理 11.8 Hz · 处理 P95 10.0 ms\n帧提交至结果 P95 12.4 ms"
+  },
+  "shortRun": {
+    "elapsedMs": 9573.5,
+    "distanceM": 10.642904999999791,
+    "averageFps": 30.587105395022558,
+    "limitation": "Short synthetic-input run; not 15-minute joint inference acceptance"
+  }
+}

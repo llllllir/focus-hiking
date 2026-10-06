@@ -1,3 +1,4 @@
+import { entryPolicy } from './entry-policy';
 export interface CalibrationRow { features: number[]; x: number; y: number; targetId: string; round?: number }
 export interface RidgeModel { means: number[]; scales: number[]; x: number[]; y: number[]; lambda: number; basis?: 'linear' | 'quadratic'; inputSize?: number; marginX?: number; marginY?: number; cvError?: number }
 function expand(f: number[], basis: 'linear' | 'quadratic') {
@@ -57,7 +58,7 @@ export function predict(model: RidgeModel, features: number[]): { x: number; y: 
 
 export function chooseRidge(rows: CalibrationRow[]): RidgeModel {
   const ids = [...new Set(rows.map(r => r.targetId))];
-  if (ids.length < 9 || ids.some(id => rows.filter(r => r.targetId === id).length < 10)) throw new Error('九点有效样本不足，请重新校准');
+  if (ids.length < 9 || ids.some(id => rows.filter(r => r.targetId === id).length < entryPolicy.stableSamples)) throw new Error('九点有效样本不足，请重新校准');
   let bestLambda = 1, bestError = Infinity, bestBasis: 'linear' | 'quadratic' = 'linear';
   let bestX: number[] = [], bestY: number[] = [];
   // Leave one target out; final five-point validation never selects lambda.

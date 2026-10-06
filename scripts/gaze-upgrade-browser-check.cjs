@@ -29,14 +29,16 @@ function fixture() {
       const sampling = overlay && !overlay.hidden;
       let x = sampling ? parseFloat(target.style.left) / 100 : state.x;
       let y = sampling ? parseFloat(target.style.top) / 100 : state.y;
+      if (sampling && overlay.dataset.task === 'validation' && state.validationOffset) { x += state.validationOffset.x; y += state.validationOffset.y; }
       let yaw = 0, pitch = 0;
       if (sampling && target.dataset.inside === 'false') [x, y] = [[-.55, .5], [1.55, .5], [.5, -.55], [.5, 1.55], [.5, 1.7]][Number(target.dataset.targetId.replace('away', ''))];
       if (sampling && target.dataset.targetId.startsWith('pose')) { const i = Number(target.dataset.targetId.slice(4)); yaw = i === 0 ? -5 : i === 1 ? 5 : 0; pitch = i === 2 ? -5 : i === 3 ? 5 : 0; }
       const left = { x: .5 - (x - .5) * .22 + yaw * .001, y: .5 + (y - .5) * .18 + pitch * .001, openness: .25 };
       const features = { left, right: { ...left }, yaw, pitch, roll: 0, faceX: state.shift ? .85 : .5, faceY: .5, faceScale: .4,
         vector: [left.x, left.y, left.x, left.y, .25, .25, yaw, pitch, 0, .5, .5, .4] };
-      const result = state.invalid ? { valid: false, reason: 'eyes-unavailable' } : { valid: true, features };
-      setTimeout(() => { if (this.active) this.onmessage?.({ data: state.fatal ? { type: 'error', message: 'synthetic failure' } : { type: 'result', result, timestampMs: message.timestampMs - (state.stale ? 1000 : 0), processingMs: 10 } }); }, 10);
+      const missedScreenTarget = sampling && overlay.dataset.task === 'screen-validation' && state.missingScreenTargets?.includes(target.dataset.targetId);
+      const result = state.invalid || missedScreenTarget ? { valid: false, reason: 'eyes-unavailable' } : { valid: true, features };
+      setTimeout(() => { if (this.active) this.onmessage?.({ data: state.fatal ? { type: 'error', message: 'synthetic failure' } : { type: 'result', result, timestampMs: message.timestampMs - (state.stale ? 1000 : 0), processingMs: state.processingDelay || 10 } }); }, state.processingDelay || 10);
     }
     terminate() { this.active = false; }
   };
@@ -51,7 +53,8 @@ async function finishTask(page, timeout = 95000) {
   }
   throw new Error(`Task timed out: ${await page.locator('.gaze-status').innerText()}`);
 }
-(async () => {
+module.exports = { media, fixture, finishTask };
+if (require.main === module) (async () => {
   fs.mkdirSync(out, { recursive: true });
   const browser = await chromium.launch({ channel: 'msedge', headless: true, args: ['--use-fake-ui-for-media-stream', '--enable-webgl', '--ignore-gpu-blocklist'] });
   const report = { input: 'synthetic Canvas + Worker fixtures, NOT human camera accuracy', humanAcceptance: 'pending', checks: {}, errors: [] };
@@ -91,14 +94,14 @@ async function finishTask(page, timeout = 95000) {
     console.log('position calibration complete');
     await page.locator('[data-action="validate"]').click(); await finishTask(page, 15000);
     assert.match(await page.locator('.gaze-report').innerText(), /达到位置门槛/);
-    report.checks.positionCalibration26EpisodesAndIndependent5PointValidation = true;
+    report.checks.positionCalibration15EpisodesAndIndependent5PointValidation = true;
     await page.locator('[data-action="screen-calibrate"]').click(); await finishTask(page);
     assert.equal(await page.locator('[data-action="screen-validate"]').isDisabled(), false, await page.locator('.gaze-status').innerText());
     console.log('screen calibration complete');
     await page.locator('[data-action="screen-validate"]').click(); await finishTask(page, 40000);
     assert.match(await page.locator('.gaze-screen-report').innerText(), /达到交互启用条件/);
     assert.equal(await page.locator('[data-action="scene"]').isDisabled(), false);
-    report.checks.screenCalibration20EpisodesIndependent10EpisodeValidation = true;
+    report.checks.screenCalibration10EpisodesIndependent10EpisodeValidation = true;
     for (const action of ['export', 'screen-export']) {
       const downloadPromise = page.waitForEvent('download'); await page.locator(`[data-action="${action}"]`).click();
       const download = await downloadPromise; const csv = fs.readFileSync(await download.path(), 'utf8');
@@ -137,9 +140,10 @@ async function finishTask(page, timeout = 95000) {
     assert.equal(await page.locator('[data-action="validate"]').isDisabled(), true);
     await page.locator('[data-action="calibrate"]').click();
     await page.evaluate(() => { Object.defineProperty(document, 'hidden', { configurable: true, get: () => true }); document.dispatchEvent(new Event('visibilitychange')); });
-    assert.equal(await page.locator('.gaze-overlay').isVisible(), false);
+    assert.equal(await page.locator('.gaze-overlay').isVisible(), true);
+    assert.match(await page.locator('.gaze-task-instruction').innerText(), /已暂停/);
     await page.evaluate(() => { Object.defineProperty(document, 'hidden', { configurable: true, get: () => false }); document.dispatchEvent(new Event('visibilitychange')); });
-    report.checks.cancellationAndBackgroundCancelSampling = true;
+    report.checks.cancellationAndBackgroundPreservesProgress = true;
     await page.locator('[data-action="stop"]').click();
     assert.equal(await page.locator('[data-action="start"]').isDisabled(), false);
     assert.ok(await page.evaluate(() => window.__mediaStops > 0));

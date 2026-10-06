@@ -3,7 +3,7 @@ import '/src/style.css';
 import {mountHikeGame} from '/src/game/hike-game.ts';
 const listeners=new Set();
 const port={subscribeSamples(fn){listeners.add(fn);return()=>listeners.delete(fn)},subscribeEvents(){return()=>{}},setTargets(){}};
-const fixture={state:'inside',x:.5,y:.5,enabled:true,game:null};
+const fixture={state:new URLSearchParams(location.search).get('initial')==='unknown'?'unknown':'inside',x:.5,y:.5,enabled:true,game:null};
 fixture.port=port;
 fixture.game=mountHikeGame(document.querySelector('#app'),port,{minutes:5,source:'simulated',onExit(){fixture.game.dispose()},onRecalibrate(){fixture.game.dispose()}});
 window.__hikeFixture=fixture;

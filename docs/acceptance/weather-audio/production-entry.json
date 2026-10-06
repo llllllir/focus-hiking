@@ -1,0 +1,8 @@
+{
+  "input": "Production bundle; explicitly seeded synthetic retry profile and Canvas/Worker, not real camera acceptance",
+  "checks": [
+    "trusted production environment-entry click unlocks one shared context before asynchronous forest preparation",
+    "automatic game entry plays audio at 80%; returning home and re-entering reuses the unlocked context without duplication"
+  ],
+  "errors": []
+}

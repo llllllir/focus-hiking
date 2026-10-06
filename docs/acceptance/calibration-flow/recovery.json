@@ -1,0 +1,10 @@
+{
+  "input": "Synthetic camera and Worker; no human accuracy claim",
+  "checks": [
+    "insufficient samples pause after two retries instead of losing the round",
+    "retry current point recovers without accepting invalid samples",
+    "Worker failure cancels guided task, displays original error and permits camera restart",
+    "cancel never enables interaction; stop releases stream"
+  ],
+  "errors": []
+}

@@ -21,6 +21,7 @@ export function mountGazeScene(parent: HTMLElement) {
       if (disposed || !camera.interactionReady) return;
       scene.hidden = false; setup.hidden = true;
       const game = mountGame(scene, camera);
+      if (camera.unverifiedEntry) { const note = document.createElement('p'); note.className = 'gaze-unverified-notice'; note.textContent = '体验模式 · 验证未达标或未验证，方向与离屏判断可能不准。'; scene.append(note); }
       const hint = scene.querySelector('.explore small');
       if (hint) hint.textContent = '真实摄像头已连接。路线规划时注视目的地约 1.2 秒出发；移动期间暂停选择。';
       const hud = document.createElement('aside'); hud.className = 'gaze-scene-hud';

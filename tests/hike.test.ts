@@ -5,6 +5,13 @@ import { HikeArchive, hikeProgress } from '../src/training/hike-archive';
 import type { GazeSample } from '../src/contracts';
 const sample=(t:number,state:'inside'|'outside'|'invalid',source:GazeSample['source']='camera'):GazeSample=>({timestampMs:t,x:state==='inside'?.7:null,y:state==='inside'?.5:null,valid:state==='inside',invalidReason:state==='outside'?'off-screen':state==='invalid'?'eyes-unavailable':null,source});
 function session(){const h=new HikeSession(5,'simulated','unit-fixture');h.start(0,'2026-10-03T00:00:00Z');return h;}
+test('camera-accepted 300ms delayed samples drive hiking, but expire at 500ms and invalid signals stop immediately',()=>{
+ const h=session();h.accept(sample(0,'inside'),300);assert.equal(h.isWalking(300),true);
+ assert.equal(h.isWalking(500),true);assert.equal(h.isWalking(501),false);
+ h.accept(sample(600,'inside'),900);assert.equal(h.isWalking(900),true);
+ h.accept(sample(901,'invalid'),901);assert.equal(h.isWalking(901),false);assert.equal(h.departures,0);
+ h.accept(sample(1000,'inside'),1501);assert.equal(h.isWalking(1501),false);
+});
 test('timed gaze hiking starts only once and rejects unsupported durations',()=>{const h=session();assert.equal(h.start(1),false);assert.throws(()=>new HikeSession(6 as 5));assert.equal(h.remainingMs,300000);});
 test('on-screen camera moves; stable off-screen stops and feedback lasts at most 30 seconds',()=>{
  const h=session();h.accept(sample(0,'inside'),0);assert.equal(h.isWalking(1),true);h.accept(sample(100,'outside'),100);assert.equal(h.isWalking(100),false);assert.equal(h.isStorm(100),true);
@@ -17,8 +24,8 @@ test('a camera gap during verified absence cannot flicker or restart its weather
 test('blink, camera failure, simulated samples and stale coordinates never trigger distraction or motion',()=>{
  const h=session();for(let t=0;t<=1000;t+=100)h.accept(sample(t,'invalid'),t);assert.equal(h.departures,0);assert.equal(h.isStorm(1000),false);
  h.accept(sample(1100,'inside','simulated'),1100);assert.equal(h.isWalking(1100),false);
- h.accept(sample(1200,'inside'),1200);assert.equal(h.isWalking(1451),false);h.tick(2200);const r=h.stop(2200)!;
- assert.equal(r.onScreenMs,250);assert.equal(r.offScreenMs,0);assert.equal(r.unknownMs,1950);assert.equal(r.focusRatio,1);assert.ok(r.coverageRatio<.12);
+ h.accept(sample(1200,'inside'),1200);assert.equal(h.isWalking(1701),false);h.tick(2200);const r=h.stop(2200)!;
+ assert.equal(r.onScreenMs,500);assert.equal(r.offScreenMs,0);assert.equal(r.unknownMs,1700);assert.equal(r.focusRatio,1);assert.ok(r.coverageRatio<.25);
 });
 test('out-of-order, future and malformed samples do not replace fresh valid camera data',()=>{
  const h=session();h.accept(sample(100,'inside'),100);h.accept(sample(99,'outside'),101);h.accept(sample(200,'outside'),102);assert.equal(h.departures,0);assert.equal(h.isWalking(102),true);

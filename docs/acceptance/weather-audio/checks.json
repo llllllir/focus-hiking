@@ -1,0 +1,46 @@
+{
+  "input": "Real Web Audio output and local recordings; synthetic gaze harness only, no human microphone or camera recording",
+  "checks": [
+    "real audio context becomes running after trusted click; blocked autoplay is not labelled playing",
+    "sunny ambience uses decoded local recordings plus a continuous canopy bed, below digital clipping",
+    "rain mode produces continuous measurable output without clipping",
+    "20% and 80% volume settings measurably change the output",
+    "mute remains silent after weather switches",
+    "unmute restores ambience; disposing the scene closes its shared context",
+    "explicitly simulated blocked resume times out honestly and a trusted click recovers the same context"
+  ],
+  "levels": {
+    "clear": {
+      "rms": 0.045579236683716495,
+      "peak": 0.18119017779827118
+    },
+    "rain": {
+      "rms": 0.03767794615359392,
+      "peak": 0.14174897968769073
+    },
+    "low": {
+      "rms": 0.009214806837290736,
+      "peak": 0.03771050646901131
+    },
+    "restored": {
+      "rms": 0.03774723653932468,
+      "peak": 0.1405278742313385
+    },
+    "muted": {
+      "rms": 0.000009401636490073228,
+      "peak": 0.000046673769247718155
+    },
+    "resumed": {
+      "rms": 0.047466864661046944,
+      "peak": 0.1783759593963623
+    }
+  },
+  "initial": {
+    "contexts": [
+      "running"
+    ],
+    "pressed": "true"
+  },
+  "errors": [],
+  "listeningAcceptance": "Human hardware and listening not measured"
+}

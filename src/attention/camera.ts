@@ -6,6 +6,9 @@ import type { Mapping, GazeResult } from './pipeline';
 import type { ScreenModel, ScreenStatus } from './screen';
 export type { Mapping } from './pipeline';
 import type { WorkerRequest, WorkerResponse } from './protocol';
+import { gazeFreshMs } from './sample-timing';
+import { calibrationVersion, cleanSnapshot, sameEnvironment } from './environment';
+import type { CalibrationSnapshot, EnvironmentSignature } from './environment';
 
 export interface CameraUpdate extends GazeResult {
   processingMs: number;
@@ -30,12 +33,20 @@ export class CameraAttention implements AttentionPort {
   private pendingReject: ((error: Error) => void) | null = null;
   private visibilityEpoch = 0;
   private frameEpoch = 0;
+  private deviceKey = '';
   private visibility = () => {
     this.visibilityEpoch++;
     if (document.hidden) this.invalidate('background');
     else { this.pipeline.reset(); this.tracker.reset(); this.lastVideoTime = -1; this.lastResultMs = performance.now(); }
   };
-  private viewportChange = () => { this.clearCalibration(); this.onStatus('显示区域变化，已清除校准，请重新校准'); };
+  private viewportKey = this.displayKey();
+  private displayKey() { return `${innerWidth}:${innerHeight}:${devicePixelRatio}:${screen.width}:${screen.height}:${!!document.fullscreenElement}`; }
+  private viewportChange = () => {
+    const next = this.displayKey();
+    if (next === this.viewportKey) return;
+    this.viewportKey = next;
+    this.clearCalibration(); this.onStatus('显示区域变化，已清除校准，请重新校准');
+  };
   constructor(private onUpdate: (update: CameraUpdate) => void = () => {}, private onStatus: (status: string) => void = () => {}) {
     this.video.muted = true; this.video.playsInline = true;
     document.addEventListener('visibilitychange', this.visibility);
@@ -46,7 +57,32 @@ export class CameraAttention implements AttentionPort {
   subscribeEvents(fn: (event: GazeEvent) => void) { this.eventListeners.add(fn); return () => { this.eventListeners.delete(fn); }; }
   setTargets(targets: TargetRegion[]) { this.tracker.setTargets(targets.filter(t => t.width > 0 && t.height > 0 && [t.x, t.y, t.width, t.height].every(Number.isFinite))); }
   get running() { return this.stream !== null && this.worker !== null; }
-  get interactionReady() { return this.running && this.pipeline.positionVerified && this.pipeline.screenVerified && !!document.fullscreenElement; }
+  get interactionReady() { return this.running && this.pipeline.entryReady && !!document.fullscreenElement; }
+  get unverifiedEntry() { return this.pipeline.unverifiedEntry; }
+  get environment(): EnvironmentSignature | null {
+    const settings = this.stream?.getVideoTracks()[0]?.getSettings();
+    if (!settings || !this.deviceKey) return null;
+    return { screenWidth: screen.width, screenHeight: screen.height, width: innerWidth, height: innerHeight, pixelRatio: devicePixelRatio, videoWidth: settings.width || this.video.videoWidth, videoHeight: settings.height || this.video.videoHeight, deviceKey: this.deviceKey };
+  }
+  exportCalibration(): CalibrationSnapshot { return cleanSnapshot({ version: calibrationVersion, mapping: this.pipeline.mapping, screenModel: this.pipeline.screenModel, positionVerified: this.pipeline.positionVerified, screenVerified: this.pipeline.screenVerified }); }
+  restoreCalibration(snapshot: CalibrationSnapshot, signature: EnvironmentSignature) {
+    if (!this.running || !document.fullscreenElement || !sameEnvironment(signature, this.environment)) throw new Error('摄像头或显示环境与存档不同，请重新校准或选择对应环境');
+    const saved = cleanSnapshot(snapshot); this.pipeline.clear();
+    this.pipeline.mapping = saved.mapping; this.pipeline.screenModel = saved.screenModel;
+    this.pipeline.positionVerified = saved.positionVerified; this.pipeline.screenVerified = saved.screenVerified;
+    this.invalidate('screen-settling');
+  }
+  allowBasicEntry() {
+    if (!this.running || !document.fullscreenElement) return false;
+    this.pipeline.basicEntry = true; this.pipeline.unverifiedEntry = true; this.invalidate('screen-settling'); return true;
+  }
+  allowUnverifiedEntry() {
+    if (!this.running || !document.fullscreenElement || !this.pipeline.mapping || !this.pipeline.screenModel) return false;
+    this.pipeline.unverifiedEntry = true;
+    this.invalidate('screen-settling');
+    return true;
+  }
+  revokeUnverifiedEntry() { this.pipeline.unverifiedEntry = false; this.pipeline.basicEntry = false; this.invalidate('interaction-paused'); }
   drawEyePreview(canvas: HTMLCanvasElement, features: EyeFeatures | null) {
     const context = canvas.getContext('2d'); if (!context) return;
     context.clearRect(0, 0, canvas.width, canvas.height);
@@ -62,9 +98,9 @@ export class CameraAttention implements AttentionPort {
   subscribeUpdates(fn: (update: CameraUpdate) => void) { this.updateListeners.add(fn); return () => { this.updateListeners.delete(fn); }; }
   subscribeScreenStatus(fn: (status: ScreenStatus) => void) { this.statusListeners.add(fn); return () => { this.statusListeners.delete(fn); }; }
   setMapping(mapping: Mapping | null) { this.pipeline.clear(); this.pipeline.mapping = mapping; this.invalidate('not-calibrated'); }
-  setScreenMapping(model: ScreenModel | null) { this.pipeline.screenModel = model; this.pipeline.screenVerified = false; this.invalidate('screen-unverified'); }
-  verifyPosition(passed: boolean) { this.pipeline.positionVerified = passed; if (!passed) this.invalidate('position-unverified'); }
-  verifyScreen(passed: boolean) { this.pipeline.screenVerified = passed; if (!passed) this.invalidate('screen-unverified'); }
+  setScreenMapping(model: ScreenModel | null) { this.pipeline.basicEntry = false; this.pipeline.unverifiedEntry = false; this.pipeline.screenModel = model; this.pipeline.screenVerified = false; this.invalidate('screen-unverified'); }
+  verifyPosition(passed: boolean) { this.pipeline.basicEntry = false; this.pipeline.unverifiedEntry = false; this.pipeline.positionVerified = passed; if (!passed) this.invalidate('position-unverified'); }
+  verifyScreen(passed: boolean) { this.pipeline.basicEntry = false; this.pipeline.unverifiedEntry = false; this.pipeline.screenVerified = passed; if (!passed) this.invalidate('screen-unverified'); }
   setInteractionEnabled(enabled: boolean) { this.pipeline.interactionEnabled = enabled; this.invalidate(enabled ? 'screen-settling' : 'interaction-paused'); }
   clearCalibration() { this.pipeline.clear(); this.invalidate('not-calibrated'); }
   private publish(update: CameraUpdate) {
@@ -116,10 +152,13 @@ export class CameraAttention implements AttentionPort {
       if (generation !== this.generation) return;
       this.lastResultMs = performance.now();
       const settings = stream.getVideoTracks()[0].getSettings();
+      const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(settings.deviceId || settings.facingMode || 'default-camera'));
+      if (generation !== this.generation) return;
+      this.deviceKey = [...new Uint8Array(hash)].map(b => b.toString(16).padStart(2, '0')).join('');
       this.onStatus(`摄像头已开启 · ${settings.width}×${settings.height} · ${Math.round(settings.frameRate ?? 0)} FPS · ${delegate}`);
       this.timer = setInterval(() => {
         if (document.hidden) return;
-        if (performance.now() - this.lastResultMs > 500) this.invalidate('stale-frame');
+        if (performance.now() - this.lastResultMs > gazeFreshMs) this.invalidate('stale-frame');
         if (this.busy && performance.now() - this.sentAt > 10000) { this.stop(); this.onStatus('推理超时，请重新开启摄像头'); return; }
         void this.capture(generation);
       }, 1000 / 15);
@@ -145,10 +184,11 @@ export class CameraAttention implements AttentionPort {
   }
   private process(result: FeatureResult, timestampMs: number, processingMs: number, pipelineMs: number) {
     if (document.hidden) { this.invalidate('background'); return; }
-    if (performance.now() - timestampMs > 500) { this.invalidate('stale-frame', timestampMs, null, processingMs, pipelineMs); return; }
+    if (performance.now() - timestampMs > gazeFreshMs) { this.invalidate('stale-frame', timestampMs, null, processingMs, pipelineMs); return; }
     this.publish({ ...this.pipeline.process(result, timestampMs, !!document.fullscreenElement), processingMs, pipelineMs });
   }
   stop() {
+    this.deviceKey = '';
     this.generation++;
     this.pendingReject?.(new Error('摄像头启动已取消')); this.pendingReject = null;
     if (this.timer) clearInterval(this.timer); this.timer = null;

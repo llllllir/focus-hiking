@@ -1,4 +1,5 @@
 import type { GazeSample } from '../contracts';
+import { gazeFreshMs as freshMs } from '../attention/sample-timing';
 
 export type HikePhase = 'idle' | 'running' | 'paused' | 'completed' | 'stopped';
 export type GazeState = 'on-screen' | 'off-screen' | 'unknown';
@@ -9,7 +10,6 @@ export interface HikeRecord {
   departures: number; recoveries: number; distanceM: number;
   focusRatio: number | null; coverageRatio: number; averageFps: number | null;
 }
-const freshMs = 250;
 /** Uses the existing AttentionPort samples. Only an explicit stable off-screen
  * reason is an absence; invalid camera/pose/blink samples remain unknown. */
 export class HikeSession {

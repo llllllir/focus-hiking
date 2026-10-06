@@ -1,0 +1,41 @@
+const fs = require('node:fs'), path = require('node:path'), assert = require('node:assert/strict');
+const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright-core');
+const { media, fixture } = require('./gaze-upgrade-browser-check.cjs');
+(async () => {
+  const browser = await chromium.launch({ channel: 'msedge', headless: true });
+  try {
+    const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+    await context.addInitScript(media); await context.addInitScript(fixture);
+    const page = await context.newPage(), errors = []; page.on('pageerror', e => errors.push(e.message));
+    await page.goto((process.env.HIKE_URL || 'http://127.0.0.1:5177') + '/?mode=gaze-test');
+    await page.locator('[data-action="fullscreen"]').click();
+    await page.waitForFunction(() => !!document.fullscreenElement);
+    await page.locator('[data-action="start"]').click();
+    await page.waitForFunction(() => !document.querySelector('[data-action="guided"]').disabled);
+    await page.evaluate(() => { window.__fixture.invalid = true; });
+    await page.locator('[data-action="guided"]').click();
+    await page.waitForFunction(() => document.querySelector('.gaze-task-instruction').textContent.includes('之前的进度已保留'), null, { timeout: 15000 });
+    assert.match(await page.locator('.gaze-task-progress').innerText(), /^1 \/ 15/);
+    assert.equal(await page.locator('[data-action="scene"]').isDisabled(), true);
+    await page.evaluate(() => { window.__fixture.invalid = false; });
+    await page.locator('[data-action="sample"]').click();
+    await page.waitForFunction(() => document.querySelector('.gaze-task-progress').textContent.startsWith('2 /'));
+    await page.evaluate(() => { window.__fixture.fatal = true; });
+    await page.waitForFunction(() => !document.querySelector('[data-action="start"]').disabled);
+    assert.equal(await page.locator('.gaze-overlay').isVisible(), false);
+    assert.equal(await page.locator('[data-action="scene"]').isDisabled(), true);
+    assert.match(await page.locator('.gaze-status').innerText(), /synthetic failure/);
+    await page.evaluate(() => { window.__fixture.fatal = false; });
+    await page.locator('[data-action="start"]').click();
+    await page.waitForFunction(() => !document.querySelector('[data-action="guided"]').disabled);
+    await page.locator('[data-action="calibrate"]').click();
+    await page.locator('[data-action="cancel"]').click();
+    assert.equal(await page.locator('.gaze-overlay').isVisible(), false);
+    assert.equal(await page.locator('[data-action="scene"]').isDisabled(), true);
+    await page.locator('[data-action="stop"]').click();
+    assert.ok(await page.evaluate(() => window.__mediaStops > 0)); assert.deepEqual(errors, []);
+    const report = { input: 'Synthetic camera and Worker; no human accuracy claim', checks: ['insufficient samples pause after two retries instead of losing the round', 'retry current point recovers without accepting invalid samples', 'Worker failure cancels guided task, displays original error and permits camera restart', 'cancel never enables interaction; stop releases stream'], errors };
+    const out = path.resolve(process.env.CHECK_OUTPUT || 'docs/acceptance/easy-entry'); fs.mkdirSync(out, { recursive: true });
+    fs.writeFileSync(path.join(out, 'recovery.json'), JSON.stringify(report, null, 2)); console.log(JSON.stringify(report));
+  } finally { await browser.close(); }
+})().catch(error => { console.error(error); process.exitCode = 1; });

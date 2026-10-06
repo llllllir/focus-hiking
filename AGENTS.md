@@ -1,5 +1,7 @@
 # Agent 开发规则
 
+2026-10-06 用户明确授权公开仓库并发布 GitHub Pages。允许本次仅为子目录部署修改场景/游戏的资源与导航路径；共享契约不变。生产产物使用独立 `codex/github-pages-site` 分支，开发继续在既有分支，不合并、不推送 main、不删除任何无关分支。浏览器摄像头检查使用明确标注的合成输入，不代表真人验收。
+
 ## 目标与角色
 
 阅读 `README.md`、`docs/development-plan.md`、`docs/interfaces.md` 和当前 GitHub Issue。A（llllllir）负责本地注视与训练，B（RUI-TW）负责场景与游戏。不要把未实现、模拟演示或未测量结果描述为已通过验收。
@@ -17,6 +19,16 @@ TypeScript + Vite + Three.js；浏览器 getUserMedia；本地 MediaPipe Face La
 场景或界面修改前先读 `DESIGN.md`、`refs/README.md`、`refs/DO-NOT.md`。用户本次要求 A/B 联合初版，单 agent 顺序实现，未同时运行双方 agent；仍保留 A/B 代码归属、独立 PR 和真人审查要求，不伪装以对方身份提交或审查。
 
 ## 修改边界
+
+2026-10-05 晴雨声音修补：用户明确要求仅调整游戏晴天/雨天声音，授权本轮在 B 场景/游戏模块修改音频启动、混音、连续环境底音与音量控件；组合首页只加入用户操作时的音频解锁和生命周期释放。单 agent 顺序处理，保留 B 归属与真人审查，不修改眼动规则、校准门槛、地图或共享契约。实际结果见 `docs/acceptance/weather-audio/README.md`。
+
+2026-10-04 自动进入修订：用户明确要求游戏准备页只作提示、森林加载完成自动进入，放大视线指示；授权对 B 的 `src/game/hike-game.ts` 与 `hike.css` 作本需求内修改，单 agent 顺序处理，不以 B 身份提交或审查。行走的实时信号门控保留，共享接口不变。记录见 `docs/acceptance/automatic-entry/README.md`。
+
+2026-10-04 环境存档迭代：用户明确要求更名“此刻山间 · Here in the Mountains”、成功校准本机存档复用、同环境测试三次后免测体验。授权仅在本浏览器持久化必要模型/聚合基线和环境签名，不保存或上传图像、逐帧特征，不把私人校准档案提交 Git；覆盖原默认会话存储限制。A 实现本机存档、组合首页及测试；B app 只按明确更名要求替换顶栏品牌文字。三次失败后基础眼动仍标记未达标，不算成功模型或 M2 验收；详见 `docs/environment-archives.md`。
+
+2026-10-04 phase 8：用户再次授权降低门槛并允许未达标进入；当前策略 `easy-entry-v2-phase8`，位置有效率50%、中位25%、P90 40%，屏幕误报35%、召回50%、未知50%。体验授权与验证结果分离，仍需两种模型/摄像头/全屏，实时失效仍停步。phase 7 最终保存 `64a4a72`，早期 `d7c2d35` 保留。详见 `docs/phase8.md`；本轮仍不 merge 或删除分支，不纳入原根目录其他工作，不推送隐私信息。
+
+2026-10-04 用户明确授权“容易进入徒步优先”，允许牺牲一定准确度并降低位置/屏幕验证门槛。当前默认策略为 `src/attention/entry-policy.ts` 的 `easy-entry-v1`：位置15项、屏内外10项，独立验证保留。此用户授权覆盖原“不自行改变门槛”的限制，但不代表原M2精度门槛已通过。此前严格版本保存为phase7（d7c2d35）。范围、阈值、检查与限制见 `docs/easy-entry.md`。仅在本次对应分支提交推送，不merge、不删除其他分支、不推送隐私数据。
 
 2026-10-03 眼动升级：A 的 `codex/m2-attention` 已加入稳健采样、按眼宽归一化、有限二次岭回归选择、屏幕内外校准/独立验证及三态门控。`?mode=gaze-scene` 通过现有 AttentionPort 组合森林入口，不修改共享契约或 B 源文件。实际通过类型检查、30项逻辑测试、生产构建及13组生产浏览器检查；浏览器为明确标记的合成输入，真人精度和联合性能待测。详情见 `docs/eye-gaze-integration.md` 与 `docs/acceptance/gaze-upgrade/`。标准命令仍为 `npm ci`、`npm run dev`、`npm run typecheck`、`npm test`、`npm run build`；本机实际使用忽略目录内npm CLI，新增浏览器检查命令为 `node scripts/gaze-upgrade-browser-check.cjs`（先配置本机PLAYWRIGHT_MODULE）。
 

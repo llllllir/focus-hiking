@@ -1,0 +1,12 @@
+{
+  "input": "Synthetic Canvas and Worker only; not human gaze accuracy",
+  "checks": [
+    "guided successful validation counts once and explicitly saves fitted parameters without frames/previews",
+    "reload -> click saved environment -> camera permission/start -> actual forest walking, without calibration UI",
+    "changed viewport rejects reuse and closes camera without pretending validation passed",
+    "delete removes saved environment; fresh default profile cannot skip tests",
+    "cancel counts zero; three failed sampling rounds unlock direct entry even without fitted models; invalid live signals still block movement",
+    "three-attempt environment remains unlocked after reload, without another test"
+  ],
+  "errors": []
+}

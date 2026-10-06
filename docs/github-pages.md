@@ -28,6 +28,8 @@ npm run build
 
 ## 检查范围
 
+发布与公网浏览器检查已完成，实际结果与部署任务链接见 [发布检查记录](acceptance/github-pages/README.md)。
+
 本机实际使用已有 Node/npm 依赖执行 TypeScript、tsx 测试和 Vite 构建；63 项逻辑测试通过。`scripts/pages-browser-check.cjs` 检查主页、森林、手动入口、晴雨声音资源、声音来源与真实眼动 Worker/模型/WASM 的加载；摄像头输入明确使用合成 Canvas，不属于真人精度验收。通过 `SITE_URL` 可以检查本地子目录或公网版本，结果保存到 `docs/acceptance/github-pages/`。
 
 摄像头参数与环境存档只保存在当前浏览器；迁移到公网域名不会自动迁移旧本机存档。真人眼动精度、长时性能和主观声音听感仍待测试。
